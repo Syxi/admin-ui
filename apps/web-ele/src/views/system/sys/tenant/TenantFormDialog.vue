@@ -39,13 +39,13 @@ const rules = reactive<FormRules<TenantForm>>({
 
 /**
  * 打开租户表单弹窗（暴露给 ref）
- * @param tenantId 租户ID
+ * @param id 租户ID
  */
-async function open(tenantId?: string) {
+async function open(id?: string) {
   visible.value = true;
-  title.value = tenantId ? '修改租户' : '新增租户';
-  if (tenantId) {
-    await getTenantFormData(tenantId);
+  title.value = id ? '修改租户' : '新增租户';
+  if (id) {
+    await getTenantFormData(id);
   }
 }
 
@@ -56,15 +56,15 @@ function close() {
   visible.value = false;
   tenantFormRef.value?.resetFields();
   tenantFormRef.value?.clearValidate();
-  formData.tenantId = '';
+  formData.id = '';
 }
 
 /**
  * 获取租户数据
- * @param tenantId 租户ID
+ * @param id 租户ID
  */
-async function getTenantFormData(tenantId: string) {
-  const data = await tenantDetailApi(tenantId);
+async function getTenantFormData(id: string) {
+  const data = await tenantDetailApi(id);
   Object.assign(formData, data);
 }
 
@@ -76,9 +76,9 @@ const handleSubmit = async (formEl: FormInstance | undefined) => {
 
   await formEl.validate(async (valid) => {
     if (valid) {
-      const tenantId = formData.tenantId;
-      await (tenantId ? editTenantApi(formData) : addTenantApi(formData));
-      ElMessage.success(tenantId ? '修改租户成功' : '新增租户成功');
+      const id = formData.id;
+      await (id ? editTenantApi(formData) : addTenantApi(formData));
+      ElMessage.success(id ? '修改租户成功' : '新增租户成功');
       close();
       emit('success'); // 通知父组件刷新列表
     }
