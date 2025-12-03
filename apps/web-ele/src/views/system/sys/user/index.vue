@@ -23,7 +23,6 @@ defineOptions({
   name: 'User',
   inheritAttrs: false,
 });
-
 // 加载状态
 const loading = ref(false);
 
@@ -237,6 +236,14 @@ async function handleExport() {
   window.URL.revokeObjectURL(downloadUrl);
 }
 
+// 控制左侧机构树区域的显示与隐藏
+const isDeptTreeVisible = ref(true);
+
+// 切换左侧机构树显示状态
+function toggleDeptTree() {
+  isDeptTreeVisible.value = !isDeptTreeVisible.value;
+}
+
 onMounted(() => {
   // 初始化用户列表数据
   handleQuery();
@@ -253,27 +260,48 @@ const autoHeight = useAutoHeight(120);
   <div class="app-container">
     <!--部门树-->
     <el-row :gutter="4">
-      <el-col :span="4">
-        <el-scrollbar :height="autoHeight" class="tree-container">
-          <el-input v-model="deptName" placeholder="机构名称" class="mt-4">
-            <template #prefix>
-              <el-icon class="el-input__icon"><search /></el-icon>
-            </template>
-          </el-input>
+      <el-col :span="isDeptTreeVisible ? 4 : 0">
+        <div class="tree-container-wrapper">
+          <el-scrollbar :height="autoHeight" class="tree-container">
+            <el-input
+              v-model="deptName"
+              placeholder="机构名称"
+              class="mt-4"
+              style="width: 100%"
+            >
+              <template #prefix>
+                <el-icon><search /></el-icon>
+              </template>
+            </el-input>
 
-          <ElTree
-            class="mt-2"
-            ref="deptTreeRef"
-            :data="deptTreeOptionData"
-            highlight-current
-            :default-expand-all="true"
-            :filter-node-method="filterNode"
-            @node-click="handleNodeClick"
-          />
-        </el-scrollbar>
+            <ElTree
+              class="mt-2"
+              ref="deptTreeRef"
+              :data="deptTreeOptionData"
+              highlight-current
+              :default-expand-all="true"
+              :filter-node-method="filterNode"
+              @node-click="handleNodeClick"
+            />
+          </el-scrollbar>
+
+          <!-- 收缩按钮 -->
+          <div class="toggle-button" @click="toggleDeptTree" v-if="isDeptTreeVisible">
+            <el-icon>
+              <ArrowLeft />
+            </el-icon>
+          </div>
+        </div>
       </el-col>
 
-      <el-col :span="20">
+      <!-- 展开按钮（当机构树隐藏时显示） -->
+      <div class="expand-button" @click="toggleDeptTree" v-if="!isDeptTreeVisible">
+        <el-icon>
+          <ArrowRight />
+        </el-icon>
+      </div>
+
+      <el-col :span="isDeptTreeVisible ? 20 : 24">
         <el-card ref="cardFormRef" class="mb-2" shadow="never">
           <ElForm :model="queryParams" ref="queryFormRef" :inline="true">
             <el-form-item prop="username" label="用户名">
@@ -543,11 +571,60 @@ const autoHeight = useAutoHeight(120);
 </template>
 
 <style lang="scss" scoped>
+.tree-container-wrapper {
+  position: relative;
+  height: 100%;
+}
+
 .tree-container {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: var(--radius);
+  height: 100%;
+}
+
+.toggle-button {
+  position: absolute;
+  top: 50%;
+  right: -12px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  background: var(--el-color-primary);
+  color: white;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
-  border-radius: var(--radius);
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-button:hover {
+  background: var(--el-color-primary-light-3);
+}
+
+.expand-button {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  background: var(--el-color-primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.expand-button:hover {
+  background: var(--el-color-primary-light-3);
 }
 </style>
