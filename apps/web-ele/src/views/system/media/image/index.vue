@@ -13,6 +13,7 @@ import {
 import { useCardHeight } from '#/hooks/useCardHeight';
 import ImageFormDialog from '#/views/system/media/image/ImageFormDialog.vue';
 import ImageUploadDialog from '#/views/system/media/image/ImageUploadDialog.vue';
+import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({
   name: 'Image',
@@ -126,8 +127,7 @@ onMounted(() => {
   handleQuery();
 });
 
-const cardFormRef = ref();
-const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
+const { tableHeight } = useTableHeight(queryForm);
 
 // 图片表单子组件
 const imageFormDialogRef = ref();
@@ -144,7 +144,6 @@ function openUploadDialog() {
 
 <template>
   <div class="app-container">
-    <el-card ref="cardFormRef" class="mb-2" shadow="never">
       <ElForm
         :model="queryParams"
         ref="queryForm"
@@ -197,9 +196,7 @@ function openUploadDialog() {
           </el-button>
         </el-form-item>
       </ElForm>
-    </el-card>
 
-    <el-card :tyle="{ height: cardHeight }" shadow="never">
       <el-table
         v-loading="loading"
         :data="imageTableData"
@@ -285,6 +282,5 @@ function openUploadDialog() {
 
       <!-- 上传图片弹框 -->
       <ImageUploadDialog ref="uploadDialogRef" @success="resetQuery" />
-    </el-card>
   </div>
 </template>

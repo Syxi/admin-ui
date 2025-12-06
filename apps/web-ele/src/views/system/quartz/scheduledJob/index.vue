@@ -17,6 +17,7 @@ import {
 } from '#/api/system/log/scheduledJob';
 import { useCardHeight } from '#/hooks/useCardHeight';
 import ScheduledJobFormDialog from '#/views/system/quartz/scheduledJob/ScheduledJobFormDialog.vue';
+import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({
   name: 'ScheduledJob',
@@ -188,13 +189,11 @@ onMounted(() => {
   handleJobBeanName();
 });
 
-const cardFormRef = ref();
-const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
+const { tableHeight } = useTableHeight(queryFormRef);
 </script>
 
 <template>
   <div class="app-container">
-    <el-card ref="cardFormRef" class="mb-2" shadow="never">
       <ElForm ref="queryFormRef" :model="queryParams" :inline="true">
         <el-form-item prop="jobName">
           <el-input
@@ -280,9 +279,7 @@ const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
           </el-button>
         </el-form-item>
       </ElForm>
-    </el-card>
 
-    <el-card :style="{ height: cardHeight }" shadow="never">
       <el-table
         v-loading="loading"
         :data="scheduledJobList"
@@ -382,7 +379,6 @@ const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
         @size-change="handleQuery"
         @current-change="handleQuery"
       />
-    </el-card>
 
     <!-- 表单弹窗 -->
     <ScheduledJobFormDialog ref="scheduledJobDialogRef" @success="resetQuery" />

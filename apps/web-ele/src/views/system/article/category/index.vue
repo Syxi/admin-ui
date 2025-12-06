@@ -14,6 +14,7 @@ import {
 } from '#/api/system/article/category';
 import {useCardHeight} from "#/hooks/useCardHeight";
 import CategoryFormDialog from "#/views/system/article/category/CategoryFormDialog.vue";
+import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({
   name: 'Category',
@@ -96,8 +97,7 @@ onMounted(() => {
   handleQuery();
 });
 
-const cardFormRef = ref();
-const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
+const { tableHeight } = useTableHeight(queryFormRef);
 
 // 新增、编辑对话框子组件
 const categoryFormDialogRef = ref();
@@ -108,7 +108,6 @@ function openDialog(categoryId?: string) {
 
 <template>
   <div class="app-container">
-    <el-card ref="cardFormRef" class="mb-2" shadow="never">
       <ElForm ref="queryFormRef" :model="queryParams" :inline="true">
         <el-form-item prop="categoryName">
           <el-input
@@ -157,9 +156,7 @@ function openDialog(categoryId?: string) {
           </el-button>
         </el-form-item>
       </ElForm>
-    </el-card>
 
-    <el-card :style="{ height: cardHeight }" shshadow="never">
       <el-table
         v-loading="loading"
         heighlight-current-row
@@ -224,7 +221,6 @@ function openDialog(categoryId?: string) {
         @size-change="handleQuery"
         @current-change="handleQuery"
       />
-    </el-card>
 
     <CategoryFormDialog ref="categoryFormDialogRef" @success="resetQuery" />
   </div>

@@ -12,6 +12,7 @@ import {
 } from '#/api/system/sys/position';
 import { useCardHeight } from '#/hooks/useCardHeight';
 import PositionFormDialog from '#/views/system/sys/position/PositionFormDialog.vue';
+import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({
   name: 'Position',
@@ -118,13 +119,11 @@ onMounted(() => {
   deptTreeOptions();
 });
 
-const cardFormRef = ref();
-const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
+const { tableHeight } = useTableHeight(queryFormRef);
 </script>
 
 <template>
   <div class="app-container">
-    <el-card ref="cardFormRef" class="mb-2" shadow="never">
       <ElForm
         ref="queryFormRef"
         :model="queryParams"
@@ -179,9 +178,7 @@ const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
           </el-button>
         </el-form-item>
       </ElForm>
-    </el-card>
 
-    <el-card :style="{ height: cardHeight }" shadow="never">
       <el-table
         ref="dataTableRef"
         v-loading="loading"
@@ -266,7 +263,6 @@ const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
         @size-change="handleQuery"
         @current-change="handleQuery"
       />
-    </el-card>
 
     <!-- 表单弹窗 -->
     <PositionFormDialog ref="formDialogRef" @success="resetQuery" />

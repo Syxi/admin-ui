@@ -13,6 +13,7 @@ import {
 import { selectCategoryOptionApi } from '#/api/system/article/category';
 import { useCardHeight } from '#/hooks/useCardHeight';
 import ArticleFormDrawer from '#/views/system/article/article/ArticleFormDrawer.vue';
+import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({
   name: 'Article',
@@ -111,8 +112,7 @@ onMounted(() => {
   getCategoryList();
 });
 
-const cardFormRef = ref();
-const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
+const { tableHeight } = useTableHeight(queryFormRef);
 
 // 新增、修改文章表单子组件
 const articleFormDrawerRef = ref();
@@ -123,7 +123,6 @@ function openDialog(id?: string) {
 
 <template>
   <div class="app-container">
-    <el-card ref="cardFormRef" class="mb-2" shadow="never">
       <ElForm ref="queryFormRef" :model="queryParams" :inline="true">
         <el-form-item prop="title">
           <el-input
@@ -207,9 +206,7 @@ function openDialog(id?: string) {
           </el-button>
         </el-form-item>
       </ElForm>
-    </el-card>
 
-    <el-card :style="{ height: cardHeight }" shadow="never">
       <el-table
         v-loading="loading"
         heighlight-current-row
@@ -299,7 +296,6 @@ function openDialog(id?: string) {
         @size-change="handleQuery"
         @current-change="handleQuery"
       />
-    </el-card>
 
     <ArticleFormDrawer ref="articleFormDrawerRef" @success="handleQuery" />
   </div>

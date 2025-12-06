@@ -13,6 +13,7 @@ import {
   kickoutUserApi,
   selectOnlineUserPageApi,
 } from '#/api/system/sys/onlineUser';
+import {useTableHeight} from "#/hooks/useTableHeight";
 
 const queryFormRef = ref(ElForm);
 const total = ref();
@@ -66,11 +67,12 @@ async function resetQuery() {
 onMounted(() => {
   handleQuery();
 });
+
+const { tableHeight } = useTableHeight(queryFormRef);
 </script>
 
 <template>
   <div class="app-container">
-    <el-card shadow="never">
       <ElForm
         ref="queryFormRef"
         :model="queryFormParams"
@@ -95,9 +97,12 @@ onMounted(() => {
           <el-button type="primary" @click="resetQuery()">重置</el-button>
         </el-form-item>
       </ElForm>
-    </el-card>
-    <el-card shadow="never" class="mt-2">
-      <el-table :data="onlineUserData" v-loading="loading">
+      <el-table
+        :data="onlineUserData"
+        v-loading="loading"
+        border
+        :height="tableHeight"
+      >
         <el-table-column label="用户名" prop="username" />
         <el-table-column label="登录时间" prop="loginTime" />
 <!--        <el-table-column label="操作">-->
@@ -124,6 +129,5 @@ onMounted(() => {
         @size-change="handleQuery"
         @current-change="handleQuery"
       />
-    </el-card>
   </div>
 </template>

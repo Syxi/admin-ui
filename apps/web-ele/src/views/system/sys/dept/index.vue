@@ -12,9 +12,10 @@ import {
 } from '#/api/system/sys/dept';
 import { useCardHeight } from '#/hooks/useCardHeight';
 import DeptFormDialog from '#/views/system/sys/dept/DeptFormDialog.vue';
+import {useTableHeight} from "#/hooks/useTableHeight";
 
 // 查询表单
-const queryElFormRef = ref(ElForm);
+const queryFormRef = ref(ElForm);
 
 // 查询参数
 const queryParams = reactive<DeptQuery>({});
@@ -90,15 +91,13 @@ onMounted(() => {
   OrgOptionTree();
 });
 
-const cardFormRef = ref();
-const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
+const { tableHeight } = useTableHeight(queryFormRef, { tableOffset: -30 });
 </script>
 
 <template>
   <div class="app-container">
-    <el-card ref="cardFormRef" class="mb-2" shadow="never">
       <ElForm
-        ref="queryElFormRef"
+        ref="queryFormRef"
         :inline="true"
         :model="queryParams"
         class="mb-2"
@@ -140,9 +139,7 @@ const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
           </el-button>
         </el-form-item>
       </ElForm>
-    </el-card>
 
-    <el-card :style="{ height: cardHeight }" shadow="never">
       <el-table
         border
         :data="deptTableData"
@@ -243,7 +240,6 @@ const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
           </template>
         </el-table-column>
       </el-table>
-    </el-card>
 
     <DeptFormDialog ref="deptFormDialogRef" @success="resetQuery" />
   </div>

@@ -11,6 +11,7 @@ import { deleteMenuApi, selectMenuTreeApi } from '#/api/system/sys/menu';
 import { MenuTypeEnum } from '#/enums/MenuTypesEnum';
 import { useCardHeight } from '#/hooks/useCardHeight';
 import MenuFormDialog from '#/views/system/sys/menu/MenuFormDialog.vue';
+import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({
   name: 'Menu',
@@ -110,10 +111,7 @@ function handleDelete(menuId: string) {
     .catch(() => ElMessage.info('已取消删除'));
 }
 
-const cardFormRef = ref();
-const { cardHeight, tableHeight } = useCardHeight(cardFormRef, {
-  tableOffset: 20,
-});
+const { tableHeight } = useTableHeight(queryFormRef, { tableOffset: -30 });
 
 onMounted(() => {
   handleQuery();
@@ -121,8 +119,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="app-container">
-    <el-card ref="cardFormRef" class="mb-2" shadow="never">
+  <div  class="app-container">
       <ElForm
         ref="queryFormRef"
         :model="queryParams"
@@ -176,9 +173,6 @@ onMounted(() => {
           </el-button>
         </el-form-item>
       </ElForm>
-    </el-card>
-
-    <el-card :style="{ height: cardHeight }" shadow="never">
       <el-table
         ref="tableRef"
         v-loading="loading"
@@ -308,7 +302,6 @@ onMounted(() => {
           </template>
         </el-table-column>
       </el-table>
-    </el-card>
 
     <MenuFormDialog ref="menuFormDialog" @success="handleQuery" />
   </div>

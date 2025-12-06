@@ -18,6 +18,7 @@ import {
 } from '#/api/system/sys/notice';
 import {useCardHeight} from "#/hooks/useCardHeight";
 import NoticeFormDrawer from "#/views/system/sys/notice/NoticeFormDrawer.vue";
+import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({
   name: 'Notice',
@@ -181,13 +182,11 @@ onMounted(() => {
   handleQuery();
 });
 
-const cardFormRef = ref();
-const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
+const { tableHeight } = useTableHeight(queryFormRef);
 </script>
 
 <template>
   <div class="app-container">
-    <el-card ref="cardFormRef" class="mb-2" shadow="never">
       <ElForm ref="queryFormRef" :model="queryParams" :inline="true" @submit.prevent>
         <el-form-item prop="roleName">
           <el-input
@@ -272,9 +271,7 @@ const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
           </el-button>
         </el-form-item>
       </ElForm>
-    </el-card>
 
-    <el-card :style="{ height: cardHeight }" shadow="never">
       <el-table
         ref="dataTableRef"
         v-loading="loading"
@@ -377,7 +374,6 @@ const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
         @size-change="handleQuery"
         @current-change="handleQuery"
       />
-    </el-card>
 
     <!-- 表单弹窗 -->
     <NoticeFormDrawer ref="noticeFormDrawerRef" @success="resetQuery" />

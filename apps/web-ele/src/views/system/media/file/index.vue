@@ -14,6 +14,7 @@ import {
 import { useCardHeight } from '#/hooks/useCardHeight';
 import FileUploadDialog from '#/views/system/media/file/FileUploadDialog.vue';
 import PdfViewDialog from '#/views/system/media/file/PdfViewDialog.vue';
+import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({
   name: 'File',
@@ -184,13 +185,11 @@ onMounted(() => {
   handleQuery();
 });
 
-const cardFormRef = ref();
-const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
+const { tableHeight } = useTableHeight(queryForm);
 </script>
 
 <template>
   <div class="app-container">
-    <el-card ref="cardFormRef" class="mb-2" shadow="never">
       <ElForm
         :model="queryParams"
         ref="queryForm"
@@ -243,9 +242,7 @@ const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
           </el-button>
         </el-form-item>
       </ElForm>
-    </el-card>
 
-    <el-card :style="{ height: cardHeight }" shadow="never">
       <el-table
         v-loading="loading"
         :data="fileTableData"
@@ -326,7 +323,6 @@ const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
         @size-change="handleQuery"
         @current-change="handleQuery"
       />
-    </el-card>
 
     <!--上传文件弹窗-->
     <FileUploadDialog ref="fileUploadDialogRef" @success="resetQuery" />

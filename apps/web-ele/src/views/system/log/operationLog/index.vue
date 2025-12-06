@@ -5,6 +5,7 @@ import { onMounted, reactive, ref } from 'vue';
 
 import { selectOperationLogPageApi } from '#/api/system/log/log';
 import {useCardHeight} from "#/hooks/useCardHeight";
+import {useTableHeight} from "#/hooks/useTableHeight";
 
 const queryFormRef = ref();
 
@@ -45,13 +46,11 @@ onMounted(() => {
   handleQuery();
 });
 
-const cardFormRef = ref();
-const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
+const { tableHeight } = useTableHeight(queryFormRef);
 </script>
 
 <template>
   <div class="app-container">
-    <el-card ref="cardFormRef" class="mb-2" shadow="never">
       <el-form ref="queryFormRef" :model="queryParams" :inline="true" @submit.prevent>
         <el-form-item prop="username">
           <el-input
@@ -78,9 +77,7 @@ const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
           </el-button>
         </el-form-item>
       </el-form>
-    </el-card>
 
-    <el-card :style="{ height: cardHeight }" shadow="never">
       <el-table
         :data="operationLogData"
         :loading="loading"
@@ -127,6 +124,5 @@ const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
         @size-change="handleQuery"
         @current-change="handleQuery"
       />
-    </el-card>
   </div>
 </template>

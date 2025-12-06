@@ -13,6 +13,7 @@ import {
 import { useCardHeight } from '#/hooks/useCardHeight';
 import VideoPlayerDialog from '#/views/system/media/video/VideoPlayerDialog.vue';
 import VideoUploadDialog from '#/views/system/media/video/VideoUploadDialog.vue';
+import {useTableHeight} from "#/hooks/useTableHeight";
 
 // import 'video.js/dist/video-js.css';
 
@@ -119,8 +120,7 @@ function handleDeleteVideo(id?: string) {
   });
 }
 
-const cardFormRef = ref();
-const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
+const { tableHeight } = useTableHeight(queryForm);
 
 // 播放视频子组件
 const videoPlayerDialogRef = ref();
@@ -141,7 +141,6 @@ onMounted(() => {
 
 <template>
   <div class="app-container">
-    <el-card ref="cardFormRef" class="mb-2" shadow="never">
       <ElForm
         :model="queryParams"
         ref="queryForm"
@@ -194,9 +193,7 @@ onMounted(() => {
           </el-button>
         </el-form-item>
       </ElForm>
-    </el-card>
 
-    <el-card :style="{ height: cardHeight }" shadow="never">
       <el-table
         v-loading="loading"
         :data="videoTableData"
@@ -267,6 +264,5 @@ onMounted(() => {
 
       <VideoPlayerDialog ref="videoPlayerDialogRef" />
       <VideoUploadDialog ref="videoUploadDialogRef" @success="handleQuery" />
-    </el-card>
   </div>
 </template>

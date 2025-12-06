@@ -18,7 +18,7 @@ import {
   enableRoleApi,
   selectRolePageApi,
 } from '#/api/system/sys/role';
-import { useCardHeight } from '#/hooks/useCardHeight';
+import { useTableHeight } from '#/hooks/useTableHeight';
 import RoleFormDialog from '#/views/system/sys/role/RoleFormDialog.vue';
 import RoleMenuDrawer from '#/views/system/sys/role/RoleMenuDrawer.vue';
 import RoleUserDialog from '#/views/system/sys/role/RoleUserDialog.vue';
@@ -90,7 +90,7 @@ function handleSelectionChange(selection: any) {
  * @param prop 排序字段
  * @param order {null: 不排序；ascending: 升序；descending: 降序}
  */
-const handleSortChange = ({ prop, order }) => {
+const handleSortChange = ({ prop, order }: { prop: string; order: string }) => {
   if (order === null) {
     queryParams.orderByColumn = '';
     queryParams.ascOrDesc = '';
@@ -205,8 +205,7 @@ function disableRole() {
   }
 }
 
-const cardFormRef = ref();
-const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
+const { tableHeight } = useTableHeight(queryFormRef);
 
 onMounted(() => {
   handleQuery();
@@ -215,89 +214,86 @@ onMounted(() => {
 
 <template>
   <div class="app-container">
-    <el-card ref="cardFormRef" class="mb-2" shadow="never">
-      <ElForm
-        ref="queryFormRef"
-        :model="queryParams"
-        :inline="true"
-        @submit.prevent
-      >
-        <el-form-item prop="roleName">
-          <el-input
-            v-model="queryParams.roleName"
-            placeholder="角色名称"
-            clearable
-            style="width: 240px"
-            @keyup.enter="handleQuery"
-          />
-        </el-form-item>
 
-        <el-form-item>
-          <el-button type="primary" @click="handleQuery">
-            <template #icon>
-              <el-icon><Search /></el-icon>
-            </template>
-            搜索
-          </el-button>
+    <ElForm
+      ref="queryFormRef"
+      :model="queryParams"
+      :inline="true"
+      @submit.prevent
+    >
+      <el-form-item prop="roleName">
+        <el-input
+          v-model="queryParams.roleName"
+          placeholder="角色名称"
+          clearable
+          style="width: 240px"
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
 
-          <el-button type="primary" @click="resetQuery">
-            <template #icon>
-              <el-icon><Refresh /></el-icon>
-            </template>
-            重置
-          </el-button>
+      <el-form-item>
+        <el-button type="primary" @click="handleQuery">
+          <template #icon>
+            <el-icon><Search /></el-icon>
+          </template>
+          搜索
+        </el-button>
 
-          <el-button
-            type="primary"
-            v-access:code="['sys:role:add']"
-            @click="openRoleDialog()"
-          >
-            <template #icon>
-              <el-icon><Plus /></el-icon>
-            </template>
-            新增
-          </el-button>
+        <el-button type="primary" @click="resetQuery">
+          <template #icon>
+            <el-icon><Refresh /></el-icon>
+          </template>
+          重置
+        </el-button>
 
-          <el-button
-            type="primary"
-            v-access:code="['sys:role:enable']"
-            @click="enableRole()"
-          >
-            <template #icon>
-              <el-icon><SwitchButton /></el-icon>
-            </template>
-            启用
-          </el-button>
+        <el-button
+          type="primary"
+          v-access:code="['sys:role:add']"
+          @click="openRoleDialog()"
+        >
+          <template #icon>
+            <el-icon><Plus /></el-icon>
+          </template>
+          新增
+        </el-button>
 
-          <el-button
-            type="danger"
-            :disabled="roleIds.length === 0"
-            v-access:code="['sys:role:disable']"
-            @click="disableRole()"
-          >
-            <template #icon>
-              <el-icon><SwitchButton /></el-icon>
-            </template>
-            禁用
-          </el-button>
+        <el-button
+          type="primary"
+          v-access:code="['sys:role:enable']"
+          @click="enableRole()"
+        >
+          <template #icon>
+            <el-icon><SwitchButton /></el-icon>
+          </template>
+          启用
+        </el-button>
 
-          <el-button
-            type="danger"
-            :disabled="roleIds.length === 0"
-            v-access:code="['sys:role:delete']"
-            @click="handleDelete()"
-          >
-            <template #icon>
-              <el-icon><Delete /></el-icon>
-            </template>
-            删除
-          </el-button>
-        </el-form-item>
-      </ElForm>
-    </el-card>
+        <el-button
+          type="danger"
+          :disabled="roleIds.length === 0"
+          v-access:code="['sys:role:disable']"
+          @click="disableRole()"
+        >
+          <template #icon>
+            <el-icon><SwitchButton /></el-icon>
+          </template>
+          禁用
+        </el-button>
 
-    <el-card :style="{ height: cardHeight }" shadow="never">
-      <el-table
+        <el-button
+          type="danger"
+          :disabled="roleIds.length === 0"
+          v-access:code="['sys:role:delete']"
+          @click="handleDelete()"
+        >
+          <template #icon>
+            <el-icon><Delete /></el-icon>
+          </template>
+          删除
+        </el-button>
+      </el-form-item>
+    </ElForm>
+    <el-table
         ref="dataTableRef"
         v-loading="loading"
         :data="roleTableData"
@@ -400,7 +396,6 @@ onMounted(() => {
           </template>
         </el-table-column>
       </el-table>
-
       <el-pagination
         v-if="total > 0"
         v-model:current-page="queryParams.page"
@@ -411,7 +406,6 @@ onMounted(() => {
         @size-change="handleQuery"
         @current-change="handleQuery"
       />
-    </el-card>
 
     <RoleFormDialog ref="roleFormDialogRef" @success="handleQuery" />
 

@@ -18,6 +18,7 @@ import {
 import { useCardHeight } from '#/hooks/useCardHeight';
 import TenantFormDialog from '#/views/system/sys/tenant/TenantFormDialog.vue';
 import TenantUserDialog from '#/views/system/sys/tenant/TenantUserDialog.vue';
+import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({
   name: 'Tenant',
@@ -137,8 +138,7 @@ function handleDelete(id?: string) {
   });
 }
 
-const cardFormRef = ref();
-const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
+const { tableHeight } = useTableHeight(queryFormRef);
 
 onMounted(() => {
   handleQuery();
@@ -147,7 +147,6 @@ onMounted(() => {
 
 <template>
   <div class="app-container">
-    <el-card ref="cardFormRef" class="mb-2" shadow="never">
       <ElForm
         ref="queryFormRef"
         :model="queryParams"
@@ -203,9 +202,6 @@ onMounted(() => {
           </el-button>
         </el-form-item>
       </ElForm>
-    </el-card>
-
-    <el-card :style="{ height: cardHeight }" shadow="never">
       <el-table
         ref="dataTableRef"
         v-loading="loading"
@@ -309,7 +305,6 @@ onMounted(() => {
         @size-change="handleQuery"
         @current-change="handleQuery"
       />
-    </el-card>
 
     <TenantFormDialog ref="tenantFormDialogRef" @success="handleQuery" />
 
