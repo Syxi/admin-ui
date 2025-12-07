@@ -584,7 +584,7 @@ const autoHeight = useAutoHeight(130);
 .tree-container {
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background-color: hsl(var(--background));
   border-radius: var(--radius);
   height: 100%;
 }
