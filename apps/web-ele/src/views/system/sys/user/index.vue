@@ -15,9 +15,9 @@ import {
   selectUserPageApi,
 } from '#/api/system/sys/user';
 import { useAutoHeight } from '#/hooks/useAutoHeight';
-import { useCardHeight } from '#/hooks/useCardHeight';
 import UploadUserDialog from '#/views/system/sys/user/UploadUserDialog.vue';
 import UserFormDialog from '#/views/system/sys/user/UserFormDialog.vue';
+import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({
   name: 'User',
@@ -250,23 +250,19 @@ onMounted(() => {
   deptTreeOptions();
 });
 
-const cardFormRef = ref();
-const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
-
-const autoHeight = useAutoHeight(120);
+const { tableHeight } = useTableHeight(queryFormRef);
+const autoHeight = useAutoHeight(130);
 </script>
 
 <template>
-  <div class="app-container">
+  <div class="user-container">
     <!--部门树-->
     <el-row :gutter="4">
       <el-col :span="isDeptTreeVisible ? 4 : 0">
         <div class="tree-container-wrapper">
-          <el-scrollbar :height="autoHeight" class="tree-container">
             <el-input
               v-model="deptName"
               placeholder="机构名称"
-              class="mt-4"
               style="width: 100%"
             >
               <template #prefix>
@@ -274,6 +270,7 @@ const autoHeight = useAutoHeight(120);
               </template>
             </el-input>
 
+          <el-scrollbar :height="autoHeight" class="tree-container">
             <ElTree
               class="mt-2"
               ref="deptTreeRef"
@@ -284,7 +281,6 @@ const autoHeight = useAutoHeight(120);
               @node-click="handleNodeClick"
             />
           </el-scrollbar>
-
           <!-- 收缩按钮 -->
           <div class="toggle-button" @click="toggleDeptTree" v-if="isDeptTreeVisible">
             <el-icon>
@@ -294,6 +290,9 @@ const autoHeight = useAutoHeight(120);
         </div>
       </el-col>
 
+      <!-- 分割线 -->
+      <div class="divider" v-show="isDeptTreeVisible"></div>
+
       <!-- 展开按钮（当机构树隐藏时显示） -->
       <div class="expand-button" @click="toggleDeptTree" v-if="!isDeptTreeVisible">
         <el-icon>
@@ -301,10 +300,10 @@ const autoHeight = useAutoHeight(120);
         </el-icon>
       </div>
 
-      <el-col :span="isDeptTreeVisible ? 20 : 24">
-        <el-card ref="cardFormRef" class="mb-2" shadow="never">
+      <el-col :span="isDeptTreeVisible ? 19 : 24">
+        <div class="data-container">
           <ElForm :model="queryParams" ref="queryFormRef" :inline="true">
-            <el-form-item prop="username" label="用户名">
+            <el-form-item prop="username">
               <el-input
                 v-model="queryParams.username"
                 placeholder="请输入用户名"
@@ -313,7 +312,7 @@ const autoHeight = useAutoHeight(120);
               />
             </el-form-item>
 
-            <el-form-item prop="realName" label="真实姓名">
+            <el-form-item prop="realName">
               <el-input
                 v-model="queryParams.realName"
                 placeholder="请输入真实姓名"
@@ -322,7 +321,7 @@ const autoHeight = useAutoHeight(120);
               />
             </el-form-item>
 
-            <el-form-item prop="status" label="用户状态">
+            <el-form-item prop="status">
               <el-select
                 v-model="queryParams.status"
                 placeholder="用户状态"
@@ -335,7 +334,7 @@ const autoHeight = useAutoHeight(120);
               </el-select>
             </el-form-item>
 
-            <el-form-item label="创建时间">
+            <el-form-item>
               <el-date-picker
                 v-model="dateTimeRange"
                 type="daterange"
@@ -441,9 +440,6 @@ const autoHeight = useAutoHeight(120);
               </el-button>
             </el-form-item>
           </ElForm>
-        </el-card>
-
-        <el-card :style="{ height: cardHeight }" shadow="never">
           <el-table
             v-loading="loading"
             border
@@ -558,7 +554,7 @@ const autoHeight = useAutoHeight(120);
             @size-change="handleQuery"
             @current-change="handleQuery"
           />
-        </el-card>
+        </div>
       </el-col>
     </el-row>
 
@@ -571,9 +567,18 @@ const autoHeight = useAutoHeight(120);
 </template>
 
 <style lang="scss" scoped>
+.user-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: #FFFFFF;
+}
+
 .tree-container-wrapper {
   position: relative;
   height: 100%;
+  padding: 20px;
 }
 
 .tree-container {
@@ -626,5 +631,17 @@ const autoHeight = useAutoHeight(120);
 
 .expand-button:hover {
   background: var(--el-color-primary-light-3);
+}
+
+.divider {
+  width: 1px;
+  height: calc(100% - 80px);
+  background-color: #e4e7ed;
+}
+
+.data-container {
+  width: 100%;
+  height: 100%;
+  padding: 20px 20px 0 20px;
 }
 </style>
