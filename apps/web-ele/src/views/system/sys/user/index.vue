@@ -572,7 +572,7 @@ const autoHeight = useAutoHeight(130);
   flex-direction: column;
   width: 100%;
   height: 100%;
-  background-color: #FFFFFF;
+  background-color: hsl(var(--background));
 }
 
 .tree-container-wrapper {
