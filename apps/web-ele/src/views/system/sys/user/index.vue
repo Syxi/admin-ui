@@ -250,8 +250,11 @@ onMounted(() => {
   deptTreeOptions();
 });
 
-const { tableHeight } = useTableHeight(queryFormRef);
-const autoHeight = useAutoHeight(130);
+const { tableHeight } = useTableHeight(queryFormRef, {
+  headerHeight: 100, // 增加头部高度以适应实际布局
+  tableOffset: -80   // 调整表格偏移量
+});
+const autoHeight = useAutoHeight(180); // 调整自动高度偏移量
 </script>
 
 <template>
@@ -300,7 +303,7 @@ const autoHeight = useAutoHeight(130);
         </el-icon>
       </div>
 
-      <el-col :span="isDeptTreeVisible ? 19 : 24">
+      <el-col :span="isDeptTreeVisible ? 20 : 24">
         <div class="data-container">
           <ElForm :model="queryParams" ref="queryFormRef" :inline="true">
             <el-form-item prop="username">
@@ -568,6 +571,7 @@ const autoHeight = useAutoHeight(130);
 
 <style lang="scss" scoped>
 .user-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -575,10 +579,17 @@ const autoHeight = useAutoHeight(130);
   background-color: hsl(var(--background));
 }
 
+.el-row {
+  position: relative;
+  flex: 1;
+  min-height: 0; /* 允许flex项目收缩到内容高度 */
+}
+
 .tree-container-wrapper {
   position: relative;
   height: 100%;
   padding: 20px;
+  margin-right: 1px; /* 为分割线预留空间 */
 }
 
 .tree-container {
@@ -634,9 +645,13 @@ const autoHeight = useAutoHeight(130);
 }
 
 .divider {
+  position: absolute;
+  top: 0;
+  left: calc((100% / 6) - 1px); /* 4/24 = 1/6，更简洁的计算方式 */
   width: 1px;
-  height: calc(100% - 80px);
-  background-color: #e4e7ed;
+  height: 100%;
+  background-color: hsl(var(--border));
+  z-index: 1;
 }
 
 .data-container {
