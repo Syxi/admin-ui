@@ -18,6 +18,7 @@ import { useAutoHeight } from '#/hooks/useAutoHeight';
 import UploadUserDialog from '#/views/system/sys/user/UploadUserDialog.vue';
 import UserFormDialog from '#/views/system/sys/user/UserFormDialog.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
+import { ArrowDown } from "@element-plus/icons-vue";
 
 defineOptions({
   name: 'User',
@@ -306,23 +307,23 @@ const autoHeight = useAutoHeight(180); // 调整自动高度偏移量
       <el-col :span="isDeptTreeVisible ? 20 : 24">
         <div class="data-container">
           <ElForm :model="queryParams" ref="queryFormRef" :inline="true">
-            <el-form-item prop="username">
+            <el-form-item prop="Keywords">
               <el-input
-                v-model="queryParams.username"
-                placeholder="请输入用户名"
+                v-model="queryParams.Keywords"
+                placeholder="请输入用户名或真实姓名"
                 @keyup.enter="handleQuery()"
                 clearable
               />
             </el-form-item>
 
-            <el-form-item prop="realName">
-              <el-input
-                v-model="queryParams.realName"
-                placeholder="请输入真实姓名"
-                @keyup.enter="handleQuery()"
-                clearable
-              />
-            </el-form-item>
+<!--            <el-form-item prop="realName">-->
+<!--              <el-input-->
+<!--                v-model="queryParams.realName"-->
+<!--                placeholder="请输入真实姓名"-->
+<!--                @keyup.enter="handleQuery()"-->
+<!--                clearable-->
+<!--              />-->
+<!--            </el-form-item>-->
 
             <el-form-item prop="status">
               <el-select
@@ -374,52 +375,6 @@ const autoHeight = useAutoHeight(180); // 调整自动高度偏移量
               </el-button>
 
               <el-button
-                type="danger"
-                v-access:code="['sys:user:delete']"
-                :disabled="userIds.length === 0"
-                @click="handleDelete()"
-              >
-                <template #icon>
-                  <el-icon><Delete /></el-icon>
-                </template>
-                删除
-              </el-button>
-
-              <el-button
-                v-access:code="['sys:user:enable']"
-                type="primary"
-                @click="enableUser()"
-              >
-                <template #icon>
-                  <el-icon><SwitchButton /></el-icon>
-                </template>
-                启用
-              </el-button>
-
-              <el-button
-                v-access:code="['sys:user:disable']"
-                type="danger"
-                :disabled="userIds.length === 0"
-                @click="disableUser()"
-              >
-                <template #icon>
-                  <el-icon><SwitchButton /></el-icon>
-                </template>
-                禁用
-              </el-button>
-              <el-button
-                type="danger"
-                :disabled="userIds.length === 0"
-                @click="resetPassword()"
-                v-access:code="['sys:user:password']"
-              >
-                <template #icon>
-                  <el-icon><RefreshRight /></el-icon>
-                </template>
-                重置密码
-              </el-button>
-
-              <el-button
                 type="primary"
                 @click="openUploadUserDialog"
                 v-access:code="['sys:user:import']"
@@ -427,21 +382,46 @@ const autoHeight = useAutoHeight(180); // 调整自动高度偏移量
                 <template #icon>
                   <el-icon><Upload /></el-icon>
                 </template>
-                导入用户
+                导入
               </el-button>
 
               <el-button
                 type="primary"
-                class="ml-3"
                 @click="handleExport"
                 v-access:code="['sys:user:export']"
+                class="mr-3"
               >
                 <template #icon>
                   <el-icon><Download /></el-icon>
                 </template>
-                导出用户
+                导出
               </el-button>
+
+              <el-dropdown>
+                <el-button type="primary">
+                  批量操作 <el-icon class="el-icon--right"><arrow-down/></el-icon>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item v-access:code="['sys:user:delete']" @click="handleDelete()">
+                      批量删除
+                    </el-dropdown-item>
+                    <el-dropdown-item v-access:code="['sys:user:enable']" @click="enableUser()">
+                      批量启用
+                    </el-dropdown-item>
+                    <el-dropdown-item v-access:code="['sys:user:disable']" @click="disableUser()">
+                      批量禁用
+                    </el-dropdown-item>
+                    <el-dropdown-item v-access:code="['sys:user:password']" @click="resetPassword()">
+                      批量重置密码
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </el-form-item>
+
+
+
           </ElForm>
           <el-table
             v-loading="loading"

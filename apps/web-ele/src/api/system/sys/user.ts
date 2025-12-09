@@ -4,11 +4,8 @@ import { requestClient } from '#/api/request';
  * 用户查询对象
  */
 export interface UserQuery extends PageQuery {
-  // 用户名
-  username?: string;
-
-  // 用户真实姓名
-  realName?: string;
+  // 用户名或用户真实姓名
+  keywords?: string;
 
   // 用户状态(1:正常;-1:禁用)
   status?: number;
