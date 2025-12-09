@@ -568,7 +568,7 @@ const autoHeight = useAutoHeight(180); // 调整自动高度偏移量
 .tree-container-wrapper {
   position: relative;
   height: 100%;
-  padding: 20px;
+  padding: 30px 20px 0 20px;
   margin-right: 1px; /* 为分割线预留空间 */
 }
 
@@ -637,6 +637,6 @@ const autoHeight = useAutoHeight(180); // 调整自动高度偏移量
 .data-container {
   width: 100%;
   height: 100%;
-  padding: 20px 20px 0 20px;
+  padding: 30px 20px 0 20px;
 }
 </style>
