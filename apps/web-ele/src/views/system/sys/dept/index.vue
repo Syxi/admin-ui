@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { DeptQuery, DeptVO } from '#/api/system/sys/dept';
 
-import { onMounted, reactive, ref } from 'vue';
+import { nextTick, onMounted, reactive, ref } from 'vue';
 
 import { ElForm, ElMessage, ElMessageBox } from 'element-plus';
+import { Expand, Fold } from '@element-plus/icons-vue';
 
 import {
   deleteDeptApi,
@@ -29,6 +30,36 @@ const deptTableData = ref<DeptVO[]>([]);
 // 加载状态
 const loading = ref(false);
 
+// 表格引用
+const tableRef = ref();
+
+// 控制表格展开状态的响应式变量，默认值为 true（全部展开）
+const isAllExpanded = ref(true);
+
+// 切换表格展开状态
+function toggleExpandAll() {
+  isAllExpanded.value = !isAllExpanded.value;
+  // 使用nextTick确保DOM更新后再执行展开/收缩操作
+  nextTick(() => {
+    setAllRowsExpansion(isAllExpanded.value);
+  });
+}
+
+// 设置所有行的展开状态
+function setAllRowsExpansion(expanded) {
+  if (tableRef.value) {
+    const expandAll = (data) => {
+      data.forEach(item => {
+        tableRef.value.toggleRowExpansion(item, expanded);
+        if (item.children && item.children.length > 0) {
+          expandAll(item.children);
+        }
+      });
+    };
+    expandAll(deptTableData.value);
+  }
+}
+
 const deptFormDialogRef = ref();
 function openDialog(id?: string, parentId?: string) {
   deptFormDialogRef.value.openDialog(id, parentId, deptTreeOptionData.value);
@@ -42,6 +73,10 @@ function handleQuery() {
   orgTreeApi(queryParams)
     .then((data) => {
       deptTableData.value = data;
+      // 数据加载完成后，根据isAllExpanded的状态设置展开状态
+      nextTick(() => {
+        setAllRowsExpansion(isAllExpanded.value);
+      });
     })
     .finally(() => {
       loading.value = false;
@@ -137,15 +172,26 @@ const { tableHeight } = useTableHeight(queryFormRef, { tableOffset: -30 });
             </template>
             新增机构
           </el-button>
+
+          <!-- 控制表格展开/收缩的按钮 -->
+          <el-button @click="toggleExpandAll" type="primary">
+            <template #icon>
+              <el-icon>
+                <ArrowDown v-if="!isAllExpanded" /><ArrowUp v-else />
+              </el-icon>
+            </template>
+            {{ isAllExpanded ? '收起全部' : '展开全部' }}
+          </el-button>
         </el-form-item>
       </ElForm>
 
       <el-table
+        ref="tableRef"
         border
         :data="deptTableData"
         v-loading="loading"
         row-key="id"
-        default-expand-all
+        :default-expand-all="isAllExpanded"
         highlight-current-row
         :height="tableHeight"
       >
@@ -205,17 +251,17 @@ const { tableHeight } = useTableHeight(queryFormRef, { tableOffset: -30 });
 
         <el-table-column align="center" label="操作">
           <template #default="scope">
-            <!--            <el-button-->
-            <!--              v-if="scope.row.deptType === 1"-->
-            <!--              type="primary"-->
-            <!--              link-->
-            <!--              size="small"-->
-            <!--              v-access:code="['sys:dept:add']"-->
-            <!--              @click="openDialog(undefined, scope.row.parentId)"-->
-            <!--            >-->
-            <!--              <el-icon><Plus /></el-icon>-->
-            <!--              新增-->
-            <!--            </el-button>-->
+            <!--            <el-button
+              v-if="scope.row.deptType === 1"
+              type="primary"
+              link
+              size="small"
+              v-access:code="['sys:dept:add']"
+              @click="openDialog(undefined, scope.row.parentId)"
+            >
+              <el-icon><Plus /></el-icon>
+              新增
+            </el-button>-->
 
             <el-button
               type="primary"
