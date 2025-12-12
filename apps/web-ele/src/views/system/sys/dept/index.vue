@@ -85,7 +85,7 @@ function handleQuery() {
 
 // 重置查询
 function resetQuery() {
-  queryElFormRef.value.resetFields();
+  queryFormRef.value.resetFields();
   queryParams.keyWord = undefined;
   handleQuery();
 }
@@ -104,7 +104,7 @@ function handleDelete(id?: string) {
       .then(() => {
         deleteDeptApi(id).then(() => {
           ElMessage.success('删除成功!');
-          resetQuery();
+          handleQuery();
           OrgOptionTree();
         });
       })
@@ -118,7 +118,15 @@ function handleDelete(id?: string) {
  * 组织机构部门下拉树
  */
 async function OrgOptionTree() {
-  deptTreeOptionData.value = await deptOptionTreeApi();
+  const data = await deptOptionTreeApi();
+  // 添加顶级根节点
+  deptTreeOptionData.value = [
+    {
+      value: '0',
+      label: '顶级机构',
+      children: data
+    }
+  ];
 }
 
 onMounted(() => {
@@ -164,7 +172,7 @@ const { tableHeight } = useTableHeight(queryFormRef, { tableOffset: -30 });
 
           <el-button
             type="primary"
-            @click="openDialog()"
+            @click="openDialog(undefined, '0')"
             v-access:code="['sys:dept:add']"
           >
             <template #icon>
@@ -287,6 +295,6 @@ const { tableHeight } = useTableHeight(queryFormRef, { tableOffset: -30 });
         </el-table-column>
       </el-table>
 
-    <DeptFormDialog ref="deptFormDialogRef" @success="resetQuery" />
+    <DeptFormDialog ref="deptFormDialogRef" @success="handleQuery" />
   </div>
 </template>

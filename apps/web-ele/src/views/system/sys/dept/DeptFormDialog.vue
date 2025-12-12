@@ -24,10 +24,25 @@ const formData = reactive<DeptForm>({
 });
 
 const rules = reactive({
-  parentId: [{ required: true, message: '上级机构不能为空', trigger: 'blur' }],
   deptName: [{ required: true, message: '名称不能为空', trigger: 'blur' }],
   deptCode: [{ required: true, message: '编码不能为空', trigger: 'blur' }],
   deptType: [{ required: true, message: '类型不能为空', trigger: 'blur' }],
+  // parentId 验证规则根据实际情况调整
+  parentId: [
+    {
+      validator: (rule: any, value: string, callback: any) => {
+        // 如果是编辑状态或者是顶级机构（parentId为'0'），则不需要验证
+        if (formData.id || value === '0') {
+          callback();
+        } else if (!value) {
+          callback(new Error('上级机构不能为空'));
+        } else {
+          callback();
+        }
+      },
+      trigger: 'blur'
+    }
+  ]
 });
 
 // 新增或编辑机构，弹出窗
@@ -58,7 +73,8 @@ async function openDialog(
     Object.assign(formData, data);
   } else {
     dialog.title = '新增';
-    formData.parentId = parentId;
+    // 确保 parentId 正确设置，如果是顶级机构则设置为 '0'
+    formData.parentId = parentId !== undefined ? parentId : '0';
   }
 }
 
@@ -115,7 +131,6 @@ defineExpose({ openDialog });
       <el-form-item
         label="上级机构"
         prop="parentId"
-        v-if="formData.parentId != '0'"
       >
         <el-tree-select
           v-model="formData.parentId"
