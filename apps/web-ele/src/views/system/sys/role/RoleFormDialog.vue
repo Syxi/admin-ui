@@ -27,16 +27,7 @@ const formData = reactive<RoleForm>({
   roleName: '',
   status: undefined,
   sort: undefined,
-  dataScope: undefined,
 });
-
-// 数据权限选项
-const dataScopeOption = [
-  { value: 0, label: '全部数据权限' },
-  { value: 1, label: '组织及子部门数据' },
-  { value: 2, label: '本部门数据权限' },
-  { value: 3, label: '本人数据' },
-];
 
 // 表单校验规则
 const rules = reactive<FormRules<RoleForm>>({
@@ -126,17 +117,6 @@ defineExpose({ open, close });
           <el-radio :value="1">启用</el-radio>
           <el-radio :value="-1">禁用</el-radio>
         </el-radio-group>
-      </el-form-item>
-
-      <el-form-item label="数据权限" prop="dataScope">
-        <el-select v-model="formData.dataScope">
-          <el-option
-            v-for="item in dataScopeOption"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
       </el-form-item>
 
       <el-form-item label="排序" prop="sort">

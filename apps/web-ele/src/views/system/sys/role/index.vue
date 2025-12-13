@@ -8,6 +8,7 @@ import {
   Edit,
   Plus,
   Refresh,
+  Setting,
   SwitchButton,
 } from '@element-plus/icons-vue';
 import { ElForm, ElMessage, ElMessageBox } from 'element-plus';
@@ -22,6 +23,8 @@ import { useTableHeight } from '#/hooks/useTableHeight';
 import RoleFormDialog from '#/views/system/sys/role/RoleFormDialog.vue';
 import RoleMenuDrawer from '#/views/system/sys/role/RoleMenuDrawer.vue';
 import RoleUserDialog from '#/views/system/sys/role/RoleUserDialog.vue';
+// 引入数据权限弹窗组件
+import RoleDataPermissionDialog from '#/views/system/sys/role/RoleDataPermissionDialog.vue';
 
 defineOptions({
   name: 'Role',
@@ -205,6 +208,19 @@ function disableRole() {
   }
 }
 
+// 数据权限组件
+const roleDataPermissionDialogRef = ref();
+
+/**
+ * 打开数据权限弹窗
+ * @param id 角色ID
+ * @param roleName 角色名称
+ * @param roleCode 角色编码
+ */
+function openRoleDataPermissionDialog(id: string, roleName: string, roleCode: string) {
+  roleDataPermissionDialogRef.value.open(id, roleName, roleCode);
+}
+
 const { tableHeight } = useTableHeight(queryFormRef);
 
 onMounted(() => {
@@ -374,6 +390,17 @@ onMounted(() => {
               <el-icon><User /></el-icon>分配用户
             </el-button>
 
+            <!-- 添加数据权限按钮 -->
+            <el-button
+              type="primary"
+              size="small"
+              link
+              @click="openRoleDataPermissionDialog(scope.row.roleId, scope.row.roleName, scope.row.roleCode)"
+              v-access:code="['sys:role:edit']"
+            >
+              <el-icon><Setting /></el-icon>数据权限
+            </el-button>
+
             <el-button
               type="primary"
               size="small"
@@ -412,5 +439,7 @@ onMounted(() => {
     <RoleMenuDrawer ref="roleMenuDialogRef" @success="resetQuery" />
 
     <RoleUserDialog ref="roleUserDialogRef" @success="resetQuery" />
+
+    <RoleDataPermissionDialog ref="roleDataPermissionDialogRef" @success="resetQuery" />
   </div>
 </template>
