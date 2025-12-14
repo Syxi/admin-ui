@@ -7,6 +7,11 @@ import { ElMessage } from 'element-plus';
 
 import { updateRoleUserApi } from '#/api/system/sys/role';
 import { UserInRoleApi, userNotInRoleApi } from '#/api/system/sys/user';
+import { useAuthStore } from '#/store';
+import { useAccessStore } from '@vben/stores';
+import { generateAccess } from '#/router/access';
+import { router } from '#/router';
+import { accessRoutes } from '#/router/routes';
 
 // 定义事件
 const emit = defineEmits<{
@@ -18,6 +23,10 @@ const visible = ref(false);
 const roleId = ref('');
 
 const roleName = ref('');
+
+// 获取store实例
+const authStore = useAuthStore();
+const accessStore = useAccessStore();
 
 // 角色分配用户弹出窗, 左侧数据
 const usersNotInRole = ref<TransferVO[]>([]);
@@ -70,8 +79,29 @@ function handleTransferChange(rightKey: TransferKey[]) {
 function handleRoleUserSubmit() {
   const userIds = handleTransferChange(usersInRole.value);
   if (roleId.value) {
-    updateRoleUserApi(roleId.value, userIds).then(() => {
+    updateRoleUserApi(roleId.value, userIds).then(async () => {
       ElMessage.success('分配用户成功!');
+      
+      // 角色分配用户后，重新获取用户信息并更新菜单路由
+      try {
+        // 重新获取用户信息
+        await authStore.fetchUserInfo();
+        
+        // 重新生成菜单和路由
+        const { accessibleMenus, accessibleRoutes } = await generateAccess({
+          router,
+          roles: [],
+          routes: accessRoutes
+        });
+        
+        // 更新accessStore中的菜单和路由
+        accessStore.setAccessMenus(accessibleMenus);
+        accessStore.setAccessRoutes(accessibleRoutes);
+        accessStore.setIsAccessChecked(true);
+      } catch (error) {
+        console.error('更新用户信息和菜单路由失败:', error);
+      }
+      
       emit('success');
       visible.value = false;
       roleId.value = '';
@@ -98,13 +128,10 @@ defineExpose({ openUserDialog });
         @change="handleTransferChange"
       />
     </div>
-
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="visible = false">取消</el-button>
-        <el-button type="primary" @click="handleRoleUserSubmit">
-          确定
-        </el-button>
+        <el-button type="primary" @click="handleRoleUserSubmit">确定</el-button>
       </div>
     </template>
   </el-dialog>

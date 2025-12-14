@@ -7,7 +7,8 @@ import { defineEmits, reactive, ref } from 'vue';
 
 import { ElForm, ElMessage } from 'element-plus';
 
-import { editRoleApi, roleDetailApi } from '#/api/system/sys/role';
+import { roleDetailApi, updateRoleDataScopeApi } from '#/api/system/sys/role';
+import { useAuthStore } from '#/store';
 
 // 定义事件
 const emit = defineEmits<{
@@ -18,6 +19,9 @@ const emit = defineEmits<{
 const visible = ref(false);
 
 const title = ref('');
+
+// 获取authStore实例
+const authStore = useAuthStore();
 
 const roleFormRef = ref<FormInstance>();
 
@@ -92,8 +96,16 @@ const handleSubmit = async (formEl: FormInstance | undefined) => {
         dataScope: formData.dataScope
       };
       
-      await editRoleApi(updateData as RoleForm);
+      await updateRoleDataScopeApi(updateData.roleId, updateData.dataScope as number);
       ElMessage.success('数据权限设置成功');
+      
+      // 数据权限变更时，只重新获取用户信息
+      try {
+        await authStore.fetchUserInfo();
+      } catch (error) {
+        console.error('重新获取用户信息失败:', error);
+      }
+      
       close();
       emit('success'); // 通知父组件刷新列表
     }

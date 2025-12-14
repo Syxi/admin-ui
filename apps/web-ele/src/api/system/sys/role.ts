@@ -167,3 +167,13 @@ export async function getRoleMenuIdsApi(roleId: string) {
 export async function updateRoleUserApi(roleId: string, userIds: string[]) {
   return requestClient.put(`/role/updateRoleUser/${roleId}`, userIds);
 }
+
+/**
+ * 更新角色数据权限
+ * @param roleId 角色ID
+ * @param dataScope 数据权限
+ * @returns
+ */
+export async function updateRoleDataScopeApi(roleId: string, dataScope: number) {
+  return requestClient.put(`/role/updateDataScope/${roleId}`,  dataScope);
+}

@@ -6,6 +6,11 @@ import { ElMessage, ElTree } from 'element-plus';
 
 import { menuOptionApi, updateRoleMenusApi } from '#/api/system/sys/menu';
 import { getRoleMenuIdsApi } from '#/api/system/sys/role';
+import { useAuthStore } from '#/store';
+import { useAccessStore } from '@vben/stores';
+import { generateAccess } from '#/router/access';
+import { router } from '#/router';
+import { accessRoutes } from '#/router/routes';
 
 // 定义事件
 const emit = defineEmits<{
@@ -15,6 +20,10 @@ const emit = defineEmits<{
 const loading = ref(false);
 
 const visible = ref(false);
+
+// 获取store实例
+const authStore = useAuthStore();
+const accessStore = useAccessStore();
 
 const roleName = ref('');
 
@@ -109,8 +118,29 @@ function handleRoleMenuSubmit() {
 
     loading.value = true;
     updateRoleMenusApi(id, checkedMenuIds)
-      .then(() => {
+      .then(async () => {
         ElMessage.success('分配权限成功');
+        
+        // 菜单授权变更时，重新获取用户信息并更新菜单路由
+        try {
+          // 重新获取用户信息
+          await authStore.fetchUserInfo();
+          
+          // 重新生成菜单和路由
+          const { accessibleMenus, accessibleRoutes } = await generateAccess({
+            router,
+            roles: [],
+            routes: accessRoutes
+          });
+          
+          // 更新accessStore中的菜单和路由
+          accessStore.setAccessMenus(accessibleMenus);
+          accessStore.setAccessRoutes(accessibleRoutes);
+          accessStore.setIsAccessChecked(true);
+        } catch (error) {
+          console.error('更新菜单路由失败:', error);
+        }
+        
         visible.value = false;
         emit('success');
       })
