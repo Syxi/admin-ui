@@ -54,7 +54,7 @@
     "sockjs-client": "^1.6.1",
     "video.js": "^8.22.0",
     "vue": "catalog:",
-    "vue-echarts": "^7.0.3",
+    "vue-echarts": "^8.0.1",
     "vue-router": "catalog:"
   },
   "devDependencies": {
