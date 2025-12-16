@@ -3,7 +3,6 @@ import { ImageCaptcha } from '#/components/image-captcha';
 import { ImageUpload } from '#/components/image-upload';
 import { ImagesUpload } from '#/components/images-upload';
 import { WangEditor } from '#/components/wang-editor/index';
-import { WebSocket } from '#/components/web-socket';
 
 // 注册自定义组件
 export function registerComponents(app: any) {
@@ -12,5 +11,4 @@ export function registerComponents(app: any) {
   app.component('images-upload', ImagesUpload);
   app.component('wang-editor', WangEditor);
   app.component('image-captcha', ImageCaptcha);
-  app.component('web-socket', WebSocket);
 }

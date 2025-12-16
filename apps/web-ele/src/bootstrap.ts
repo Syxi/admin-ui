@@ -5,7 +5,7 @@ import { registerAccessDirective } from '@vben/access';
 import { initTippy } from '@vben/common-ui';
 import { MotionPlugin } from '@vben/plugins/motion';
 import { preferences } from '@vben/preferences';
-import { initStores } from '@vben/stores';
+import { initStores, useAccessStore } from '@vben/stores';
 import '@vben/styles';
 import '@vben/styles/ele';
 
@@ -15,6 +15,7 @@ import { addCollection } from '@iconify/vue';
 import VueVideoPlayer from '@videojs-player/vue';
 import { useTitle } from '@vueuse/core';
 import ElementPlus, { ElLoading } from 'element-plus';
+import { watch } from 'vue';
 
 import { registerComponents } from '#/components';
 import { $t, setupI18n } from '#/locales';
@@ -22,6 +23,9 @@ import { $t, setupI18n } from '#/locales';
 import { initComponentAdapter } from './adapter/component';
 import App from './app.vue';
 import { router } from './router';
+
+// 导入WebSocket服务
+import webSocketService from '#/services/websocket-service';
 
 import 'echarts';
 
@@ -97,7 +101,61 @@ async function bootstrap(namespace: string) {
     }
   });
 
+  // 在应用挂载后初始化WebSocket监听
   app.mount('#app');
+  
+  // 初始化WebSocket服务
+  initWebSocketListener();
+}
+
+/**
+ * 初始化WebSocket监听
+ * 在Pinia可用后初始化WebSocket监听逻辑
+ */
+function initWebSocketListener() {
+  const accessStore = useAccessStore();
+  
+  // 监听accessToken变化
+  watch(
+    () => accessStore.accessToken,
+    (newToken, oldToken) => {
+      if (newToken && !oldToken) {
+        // 用户登录，连接WebSocket
+        console.log('User logged in, connecting WebSocket...');
+        webSocketService.connect();
+      } else if (!newToken && oldToken) {
+        // 用户登出，断开WebSocket
+        console.log('User logged out, disconnecting WebSocket...');
+        webSocketService.disconnect();
+      } else if (newToken && oldToken && newToken !== oldToken) {
+        // Token更新，重新连接WebSocket
+        console.log('Token updated, reconnecting WebSocket...');
+        webSocketService.disconnect();
+        setTimeout(() => {
+          webSocketService.connect();
+        }, 100);
+      }
+    },
+    { immediate: true }
+  );
+  
+  // 设置权限更新的默认处理逻辑
+  webSocketService.setPermissionUpdateCallback((data) => {
+    console.log('Permission update received:', data);
+    // 这里可以添加全局的权限更新处理逻辑
+  });
+  
+  // 设置进度消息的默认处理逻辑
+  webSocketService.setProgressCallback((data) => {
+    console.log('Progress message received:', data);
+    // 这里可以添加全局的进度处理逻辑
+  });
+  
+  // 设置公共消息的默认处理逻辑
+  webSocketService.setMessageCallback((data) => {
+    console.log('Public message received:', data);
+    // 这里可以添加全局的公共消息处理逻辑
+  });
 }
 
 export { bootstrap };
