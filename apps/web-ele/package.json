@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
-    "@stomp/stompjs": "^7.1.0",
+
     "@vben/access": "workspace:*",
     "@vben/common-ui": "workspace:*",
     "@vben/constants": "workspace:*",
@@ -51,7 +51,7 @@
     "element-plus": "^2.10.2",
     "jsencrypt": "^3.3.2",
     "pinia": "catalog:",
-    "sockjs-client": "^1.6.1",
+
     "video.js": "^8.22.0",
     "vue": "catalog:",
     "vue-echarts": "^7.0.3",
@@ -60,7 +60,7 @@
   "devDependencies": {
     "@iconify-json/mdi": "^1.2.3",
     "@iconify/vue": "^4.3.0",
-    "@types/sockjs-client": "^1.5.4",
+
     "unplugin-element-plus": "catalog:",
     "unplugin-icons": "^22.1.0"
   }

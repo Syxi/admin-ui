@@ -24,8 +24,6 @@ import { initComponentAdapter } from './adapter/component';
 import App from './app.vue';
 import { router } from './router';
 
-// 导入WebSocket服务
-import webSocketService from '#/services/websocket-service';
 
 
 import 'echarts';
@@ -102,16 +100,8 @@ async function bootstrap(namespace: string) {
     }
   });
 
-  // 在应用挂载后初始化WebSocket监听
+  // 在应用挂载后初始化
   app.mount('#app');
-
-  // 应用挂载后再初始化权限更新处理器和WebSocket连接
-  setTimeout(() => {
-
-
-    // 连接WebSocket
-    webSocketService.connect();
-  }, 0);
 
 }
 
