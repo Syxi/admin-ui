@@ -7,7 +7,7 @@ import { generateAccessible } from '@vben/access';
 import { preferences } from '@vben/preferences';
 import { cloneDeep } from '@vben/utils';
 
-import { ElMessage } from 'element-plus';
+import { useMessage } from 'naive-ui';
 
 import { getAllMenusApi } from '#/api';
 import { BasicLayout, IFrameView } from '#/layouts';
@@ -27,9 +27,9 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
   return await generateAccessible(preferences.app.accessMode, {
     ...options,
     fetchMenuListAsync: async () => {
-      ElMessage({
-        duration: 1500,
-        message: `${$t('common.loadingMenu')}...`,
+      const message = useMessage();
+      message.loading(`${$t('common.loadingMenu')}...`, {
+        duration: 1.5,
       });
       const data = await getAllMenusApi();
       return [...cloneDeep(localRoutes), ...data];

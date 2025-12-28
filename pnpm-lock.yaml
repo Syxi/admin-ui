@@ -728,6 +728,9 @@ importers:
       '@vueuse/core':
         specifier: 'catalog:'
         version: 12.7.0(typescript@5.7.3)
+      jsencrypt:
+        specifier: ^3.3.2
+        version: 3.3.2
       naive-ui:
         specifier: 'catalog:'
         version: 2.43.2(vue@3.5.13(typescript@5.7.3))

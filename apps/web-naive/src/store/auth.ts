@@ -8,7 +8,7 @@ import { useRouter } from 'vue-router';
 import { DEFAULT_HOME_PATH, LOGIN_PATH } from '@vben/constants';
 import { resetAllStores, useAccessStore, useUserStore } from '@vben/stores';
 
-import { ElNotification } from 'element-plus';
+import { useNotification } from 'naive-ui';
 import { JSEncrypt } from 'jsencrypt';
 import { defineStore } from 'pinia';
 
@@ -19,6 +19,7 @@ export const useAuthStore = defineStore('auth', () => {
   const accessStore = useAccessStore();
   const userStore = useUserStore();
   const router = useRouter();
+
 
   const loginLoading = ref(false);
 
@@ -88,10 +89,10 @@ export const useAuthStore = defineStore('auth', () => {
         }
 
         if (userInfo?.realName) {
-          ElNotification({
-            message: `${$t('authentication.loginSuccessDesc')}:${userInfo?.realName}`,
+          const notification = useNotification();
+          notification.success({
+            content: `${$t('authentication.loginSuccessDesc')}:${userInfo?.realName}`,
             title: $t('authentication.loginSuccess'),
-            type: 'success',
           });
         }
       }

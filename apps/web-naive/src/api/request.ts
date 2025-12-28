@@ -13,7 +13,7 @@ import {
 } from '@vben/request';
 import { useAccessStore } from '@vben/stores';
 
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { useDialog, useMessage } from 'naive-ui';
 
 import { refreshTokenApi } from '#/api/core';
 import { useAuthStore } from '#/store';
@@ -32,12 +32,13 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
    */
   async function doReAuthenticate() {
     const authStore = useAuthStore();
+    const dialog = useDialog();
 
     try {
-      await ElMessageBox.alert('会话已过期，请重新登录', '警告', {
-        confirmButtonText: '确认',
-        type: 'warning',
-        center: true,
+      await dialog.warning({
+        title: '警告',
+        content: '会话已过期，请重新登录',
+        positiveText: '确认',
       });
       await authStore.logout();
     } catch {
@@ -93,7 +94,8 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
       }
 
       // 如果没有错误信息，则会根据状态码进行提示
-      ElMessage.error(errorMessage || msg);
+      const message = useMessage();
+      message.error(errorMessage || msg);
     }),
   );
 
