@@ -463,8 +463,8 @@ catalogs:
       specifier: ^1.5.8
       version: 1.5.8
     zod:
-      specifier: ^3.24.2
-      version: 3.24.2
+      specifier: ^4.2.1
+      version: 4.2.1
     zod-defaults:
       specifier: ^0.1.3
       version: 0.1.3
@@ -1194,7 +1194,7 @@ importers:
         version: link:../../base/typings
       '@vee-validate/zod':
         specifier: 'catalog:'
-        version: 4.15.0(vue@3.5.13(typescript@5.7.3))(zod@3.24.2)
+        version: 4.15.0(vue@3.5.13(typescript@5.7.3))(zod@4.2.1)
       '@vueuse/core':
         specifier: 'catalog:'
         version: 12.7.0(typescript@5.7.3)
@@ -1206,10 +1206,10 @@ importers:
         version: 3.5.13(typescript@5.7.3)
       zod:
         specifier: 'catalog:'
-        version: 3.24.2
+        version: 4.2.1
       zod-defaults:
         specifier: 'catalog:'
-        version: 0.1.3(zod@3.24.2)
+        version: 0.1.3(zod@4.2.1)
 
   packages/@core/ui-kit/layout-ui:
     dependencies:
@@ -10154,8 +10154,8 @@ packages:
     peerDependencies:
       zod: ^3.23.8
 
-  zod@3.24.2:
-    resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
+  zod@4.2.1:
+    resolution: {integrity: sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==}
 
   zrender@5.6.1:
     resolution: {integrity: sha512-OFXkDJKcrlx5su2XbzJvj/34Q3m6PvyCZkVPHGYpcCJ52ek4U/ymZyfuV1nKE23AyBJ51E/6Yr0mhZ7xGTO4ag==}
@@ -12944,11 +12944,11 @@ snapshots:
       '@uppy/utils': 4.1.3
       nanoid: 3.3.8
 
-  '@vee-validate/zod@4.15.0(vue@3.5.13(typescript@5.7.3))(zod@3.24.2)':
+  '@vee-validate/zod@4.15.0(vue@3.5.13(typescript@5.7.3))(zod@4.2.1)':
     dependencies:
       type-fest: 4.33.0
       vee-validate: 4.15.0(vue@3.5.13(typescript@5.7.3))
-      zod: 3.24.2
+      zod: 4.2.1
     transitivePeerDependencies:
       - vue
 
@@ -19706,11 +19706,11 @@ snapshots:
       compress-commons: 6.0.2
       readable-stream: 4.7.0
 
-  zod-defaults@0.1.3(zod@3.24.2):
+  zod-defaults@0.1.3(zod@4.2.1):
     dependencies:
-      zod: 3.24.2
+      zod: 4.2.1
 
-  zod@3.24.2: {}
+  zod@4.2.1: {}
 
   zrender@5.6.1:
     dependencies:
