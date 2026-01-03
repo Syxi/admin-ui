@@ -55,6 +55,14 @@ interface BasicUserInfo {
    * 最后登录时间
    */
   lastLoginTime?: Date;
+  /**
+   * 租户ID
+   */
+  tenantId?: string;
+  /**
+   * 租户名称
+   */
+  tenantName?: string;
 }
 
 interface AccessState {

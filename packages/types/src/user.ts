@@ -48,6 +48,14 @@ interface UserInfo {
    * 最后登录时间
    */
   lastLoginTime?: Date;
+  /**
+   * 租户ID
+   */
+  tenantId?: string;
+  /**
+   * 租户名称
+   */
+  tenantName?: string;
 }
 
 export type { UserInfo };
