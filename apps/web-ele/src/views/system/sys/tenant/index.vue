@@ -18,6 +18,7 @@ import {
 import { useCardHeight } from '#/hooks/useCardHeight';
 import TenantFormDialog from '#/views/system/sys/tenant/TenantFormDialog.vue';
 import TenantUserDialog from '#/views/system/sys/tenant/TenantUserDialog.vue';
+import TenantPackageAssignDialog from '#/views/system/sys/tenantPackage/TenantPackageAssignDialog.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({
@@ -64,6 +65,9 @@ function openTenantMenuDrawer(id: string, tenantName: string) {
 // 租户用户组件
 const tenantUserDialogRef = ref();
 
+// 租户套餐授权组件
+const tenantPackageAssignDialogRef = ref();
+
 /**
  * 打开租户分配用户弹窗
  * @param id
@@ -71,6 +75,15 @@ const tenantUserDialogRef = ref();
  */
 function openTenantUserDialog(id: string, tenantName: string) {
   tenantUserDialogRef.value.openUserDialog(id, tenantName);
+}
+
+/**
+ * 打开租户套餐授权弹窗
+ * @param id
+ * @param tenantName
+ */
+function openTenantPackageAssignDialog(id: string, tenantName: string) {
+  tenantPackageAssignDialogRef.value.open(id, tenantName);
 }
 
 /**
@@ -270,6 +283,16 @@ onMounted(() => {
               v-access:code="['sys:tenant:user:add']"
             >
               <el-icon><User /></el-icon>分配用户
+            </el-button>
+
+            <el-button
+              type="success"
+              size="small"
+              link
+              @click="openTenantPackageAssignDialog(scope.row.id, scope.row.name)"
+              v-access:code="['sys:tenantPackage:assign']"
+            >
+              <el-icon><Key /></el-icon>套餐授权
             </el-button>
 
             <el-button
