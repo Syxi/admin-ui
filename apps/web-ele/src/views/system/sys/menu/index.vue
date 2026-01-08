@@ -10,7 +10,7 @@ import { ElForm, ElMessage, ElMessageBox } from 'element-plus';
 import { deleteMenuApi, selectMenuTreeApi } from '#/api/system/sys/menu';
 import { MenuTypeEnum } from '#/enums/MenuTypesEnum';
 import { useCardHeight } from '#/hooks/useCardHeight';
-import MenuFormDialog from '#/views/system/sys/menu/MenuFormDialog.vue';
+import MenuFormDrawer from '#/views/system/sys/menu/MenuFormDrawer.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({
@@ -37,10 +37,10 @@ const buttonIcon = 'mdi:text-box-outline';
 
 const allExpanded = ref(false);
 
-const menuFormDialog = ref(MenuFormDialog);
+const menuFormDrawer = ref(MenuFormDrawer);
 
 function openDialog(parentId?: string, menuId?: string) {
-  menuFormDialog.value.openDialog(parentId, menuId);
+  menuFormDrawer.value.openDialog(parentId, menuId);
 }
 
 // 展开或收缩表格树
@@ -303,7 +303,7 @@ onMounted(() => {
         </el-table-column>
       </el-table>
 
-    <MenuFormDialog ref="menuFormDialog" @success="handleQuery" />
+    <MenuFormDrawer ref="menuFormDrawer" @success="handleQuery" />
   </div>
 </template>
 

@@ -134,22 +134,23 @@ onMounted(() => {
 });
 </script>
 <template>
-  <el-dialog
-    draggable
+  <el-drawer
     v-model="dialog.visible"
     :title="dialog.title"
+    direction="rtl"
+    size="40%"
     destroy-on-close
-    width="800px"
-    center
     @close="closeDialog"
-    :z-index="100"
+    resizable
   >
-    <ElForm
-      ref="menuFormRef"
-      :model="formData"
-      :rules="rules"
-      label-width="100px"
-    >
+    <div class="">
+      <ElForm
+        ref="menuFormRef"
+        :model="formData"
+        :rules="rules"
+        label-width="100px"
+        class="pr-4"
+      >
       <el-form-item label="父级菜单" prop="parentId">
         <el-tree-select
           placeholder="选择上级菜单"
@@ -395,12 +396,14 @@ onMounted(() => {
         <el-input v-model="formData.redirect" placeholder="跳转路由" />
       </el-form-item>
     </ElForm>
-
+    </div>
     <template #footer>
-      <div class="dialog-footer">
         <el-button @click="closeDialog">取消</el-button>
         <el-button type="primary" @click="submitForm">确定</el-button>
-      </div>
     </template>
-  </el-dialog>
+  </el-drawer>
 </template>
+
+<style scoped lang="scss">
+
+</style>
