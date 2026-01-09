@@ -31,11 +31,23 @@ const formData = reactive<RoleForm>({
 });
 
 // 表单校验规则
-const rules = reactive<FormRules>({
-  roleName: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
-  roleCode: [{ required: true, message: '请输入角色编码', trigger: 'blur' }],
-  status: [{ required: true, message: '请选择状态', trigger: 'blur' }],
-});
+const rules = {
+  roleName: {
+    required: true,
+    message: '请输入角色名称',
+    trigger: ['input', 'blur']
+  },
+  roleCode: {
+    required: true,
+    message: '请输入角色编码',
+    trigger: ['input', 'blur']
+  },
+  status: {
+    required: true,
+    message: '请选择状态',
+    trigger: ['blur', 'change']
+  },
+};
 
 /**
  * 打开角色表单弹窗（暴露给 ref）
@@ -77,15 +89,16 @@ async function getRoleFormData(roleId: string) {
 const handleSubmit = async () => {
 
   const formRef = roleFormRef.value;
-  await formRef?.validate(async (errors?: any) => {
-    if (!errors) {
-      const roleId = formData.roleId;
-      await (roleId ? editRoleApi(formData) : addRoleApi(formData));
-      message.success(roleId ? '修改角色成功' : '新增角色成功');
-      close();
-      emit('success'); // 通知父组件刷新列表
-    }
-  });
+  try {
+    await formRef?.validate();
+    const roleId = formData.roleId;
+    await (roleId ? editRoleApi(formData) : addRoleApi(formData));
+    message.success(roleId ? '修改角色成功' : '新增角色成功');
+    close();
+    emit('success'); // 通知父组件刷新列表
+  } catch (error) {
+    console.error('表单验证失败:', error);
+  }
 };
 
 // 暴露方法给 ref

@@ -46,9 +46,13 @@ const dataScopeOption = [
 ];
 
 // 表单校验规则
-const rules = reactive<FormRules>({
-  dataScope: [{ required: true, message: '请选择数据权限', trigger: ['change'] }],
-});
+const rules = {
+  dataScope: {
+    required: true,
+    message: '请选择数据权限',
+    trigger: ['change', 'blur']
+  },
+};
 
 /**
  * 打开数据权限弹窗（暴露给 ref）
@@ -92,28 +96,29 @@ async function getRoleFormData(roleId: string) {
 const handleSubmit = async (formEl: any | undefined) => {
   if (!formEl) return;
 
-  await formEl.validate(async (valid: boolean) => {
-    if (valid) {
-      // 构造符合RoleForm接口的数据对象
-      const updateData: Partial<RoleForm> & { roleId: string } = {
-        roleId: formData.roleId,
-        dataScope: formData.dataScope
-      };
-      
-      await updateRoleDataScopeApi(updateData.roleId, updateData.dataScope as number);
-      message.success('数据权限设置成功');
-      
-      // 数据权限变更时，只重新获取用户信息
-      try {
-        await authStore.fetchUserInfo();
-      } catch (error) {
-        console.error('重新获取用户信息失败:', error);
-      }
-      
-      close();
-      emit('success'); // 通知父组件刷新列表
+  try {
+    await formEl.validate();
+    // 构造符合RoleForm接口的数据对象
+    const updateData: Partial<RoleForm> & { roleId: string } = {
+      roleId: formData.roleId,
+      dataScope: formData.dataScope
+    };
+    
+    await updateRoleDataScopeApi(updateData.roleId, updateData.dataScope as number);
+    message.success('数据权限设置成功');
+    
+    // 数据权限变更时，只重新获取用户信息
+    try {
+      await authStore.fetchUserInfo();
+    } catch (error) {
+      console.error('重新获取用户信息失败:', error);
     }
-  });
+    
+    close();
+    emit('success'); // 通知父组件刷新列表
+  } catch (error) {
+    console.error('表单验证失败:', error);
+  }
 };
 
 // 暴露方法给 ref

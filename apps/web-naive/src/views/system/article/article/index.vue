@@ -15,7 +15,7 @@ import { selectCategoryOptionApi } from '#/api/system/article/category';
 import { useCardHeight } from '#/hooks/useCardHeight';
 import ArticleFormDrawer from '#/views/system/article/article/ArticleFormDrawer.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
-import { Search, Refresh, Plus, Delete, Edit } from '@vben/icons';
+import { Icon } from '@iconify/vue';
 
 defineOptions({
   name: 'Article',
@@ -163,14 +163,14 @@ function openDialog(id?: string) {
         <NFormItem>
           <NButton type="primary" @click="handleQuery()">
             <template #icon>
-              <NIcon><Search /></NIcon>
+              <NIcon><Icon icon="mdi:magnify" /></NIcon>
             </template>
             搜索
           </NButton>
 
           <NButton type="primary" @click="resetQuery()">
             <template #icon>
-              <NIcon><Refresh /></NIcon>
+              <NIcon><Icon icon="mdi:refresh" /></NIcon>
             </template>
             重置
           </NButton>
@@ -181,7 +181,7 @@ function openDialog(id?: string) {
             v-access:code="['article:add']"
           >
             <template #icon>
-              <NIcon><Plus /></NIcon>
+              <NIcon><Icon icon="mdi:plus" /></NIcon>
             </template>
             新增
           </NButton>
@@ -192,7 +192,7 @@ function openDialog(id?: string) {
             v-access:code="['article:delete']"
           >
             <template #icon>
-              <NIcon><Delete /></NIcon>
+              <NIcon><Icon icon="mdi:delete" /></NIcon>
             </template>
             删除
           </NButton>

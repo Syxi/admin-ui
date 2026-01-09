@@ -18,7 +18,7 @@ import {
 } from '#/api/system/tool/switchConfig';
 import { useCardHeight } from '#/hooks/useCardHeight';
 import {useTableHeight} from "#/hooks/useTableHeight";
-import { Search, Refresh, Edit } from '@vben/icons';
+import { Icon } from '@iconify/vue';
 
 defineOptions({
   name: 'SwitchConfig',
@@ -140,14 +140,14 @@ const { tableHeight } = useTableHeight(queryFormRef);
         <NFormItem>
           <NButton type="primary" @click="handleQuery">
             <template #icon>
-              <NIcon><Search /></NIcon>
+              <NIcon><Icon icon="mdi:magnify" /></NIcon>
             </template>
             搜索
           </NButton>
 
           <NButton type="primary" @click="resetQuery">
             <template #icon>
-              <NIcon><Refresh /></NIcon>
+              <NIcon><Icon icon="mdi:refresh" /></NIcon>
             </template>
             重置
           </NButton>

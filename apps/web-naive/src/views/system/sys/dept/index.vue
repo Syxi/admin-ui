@@ -4,7 +4,7 @@ import type { DeptQuery, DeptVO } from '#/api/system/sys/dept';
 import { nextTick, onMounted, reactive, ref } from 'vue';
 
 import { NForm, NFormItem, NInput, NButton, NTable, NTag, useMessage } from 'naive-ui';
-import { Search, ArrowUp, ArrowDown } from '@vben/icons';
+import { Icon } from '@iconify/vue';
 
 
 import {
@@ -153,7 +153,7 @@ onMounted(() => {
         <NFormItem>
           <NButton type="primary" @click="handleQuery()">
             <template #icon>
-              <Search />
+              <Icon icon="mdi:magnify" />
             </template>
             搜索
           </NButton>
@@ -173,7 +173,7 @@ onMounted(() => {
           <!-- 控制表格展开/收缩的按钮 -->
           <NButton @click="toggleExpandAll" type="primary">
             <template #icon>
-              <ArrowDown v-if="!isAllExpanded" /><ArrowUp v-else />
+              <Icon icon="mdi:arrow-down" v-if="!isAllExpanded" /><Icon icon="mdi:arrow-up" v-else />
             </template>
             {{ isAllExpanded ? '收起全部' : '展开全部' }}
           </NButton>

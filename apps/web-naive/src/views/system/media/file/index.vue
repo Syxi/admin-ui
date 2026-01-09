@@ -16,7 +16,7 @@ import { useCardHeight } from '#/hooks/useCardHeight';
 import FileUploadDialog from '#/views/system/media/file/FileUploadDialog.vue';
 import PdfViewDialog from '#/views/system/media/file/PdfViewDialog.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
-import { Search, Refresh, Delete, Upload } from '@vben/icons';
+import { Icon } from '@iconify/vue';
 
 defineOptions({
   name: 'File',
@@ -213,14 +213,14 @@ const { tableHeight } = useTableHeight(queryForm);
         <NFormItem>
           <NButton type="primary" @click="handleQuery()">
             <template #icon>
-              <NIcon><Search /></NIcon>
+              <NIcon><Icon icon="mdi:magnify" /></NIcon>
             </template>
             搜索
           </NButton>
 
           <NButton type="primary" @click="resetQuery()">
             <template #icon>
-              <NIcon><Refresh /></NIcon>
+              <NIcon><Icon icon="mdi:refresh" /></NIcon>
             </template>
             重置
           </NButton>
@@ -232,7 +232,7 @@ const { tableHeight } = useTableHeight(queryForm);
             @click="handleDeleteFile()"
           >
             <template #icon>
-              <NIcon><Delete /></NIcon>
+              <NIcon><Icon icon="mdi:delete" /></NIcon>
             </template>
             删除
           </NButton>
@@ -242,7 +242,7 @@ const { tableHeight } = useTableHeight(queryForm);
             v-access:code="['sys:file:upload']"
             @click="openUploadFileDialog()"
           >
-            <NIcon> <Upload /> </NIcon>上传文件
+            <NIcon> <Icon icon="mdi:upload" /> </NIcon>上传文件
           </NButton>
         </NFormItem>
       </NForm>

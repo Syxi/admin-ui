@@ -7,7 +7,7 @@ import type {
 import { onMounted, reactive, ref, h } from 'vue';
 
 import { NButton, NPopconfirm, useMessage, useDialog, NTag, DataTableInst } from 'naive-ui';
-import { ElForm } from 'element-plus';
+
 import type { FormInst } from 'naive-ui';
 
 import {

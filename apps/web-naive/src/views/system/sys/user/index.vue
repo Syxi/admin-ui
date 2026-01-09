@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { UserPage, UserQuery } from '#/api/system/sys/user';
 
-import { h, onMounted, reactive, ref, watch } from 'vue';
+import { h, onMounted, reactive, ref, watch, computed } from 'vue';
 
-import { NButton, NDataTable, NInput, NSelect, NDatePicker, NDropdown, NDropdownOption, NPagination, NCheckbox, NTag, NForm, NFormItem, NSpace, NCard, NLayoutSider, NLayoutContent, NLayout, NTree } from 'naive-ui';
+import { NButton, NDataTable, NInput, NSelect, NDatePicker, NDropdown,  NTag, NForm, NFormItem, NSpace, NCard, NLayoutSider, NLayoutContent, NLayout, NTree } from 'naive-ui';
 import { message, dialog } from '#/adapter/naive';
 
 import { deptOptionTreeApi } from '#/api/system/sys/dept';
@@ -20,7 +20,7 @@ import { useTableHeight } from '#/hooks/useTableHeight';
 import UploadUserDialog from '#/views/system/sys/user/UploadUserDialog.vue';
 import UserFormDialog from '#/views/system/sys/user/UserFormDialog.vue';
 
-import { ArrowDown, Search, Refresh, Plus, Upload, Download, Edit, Delete, ArrowLeft, ArrowRight } from '@vben/icons';
+import { Icon } from '@iconify/vue';
 import { useUserStore } from '@vben/stores';
 
 defineOptions({
@@ -116,6 +116,121 @@ function resetQuery() {
 function handleSelectionChange(selection: any) {
   userIds.value = selection.map((item: any) => item.userId);
 }
+
+// 表格列定义
+const tableColumns = [
+  {
+    type: 'selection',
+    disabled: (row: any) => false,
+  },
+  {
+    title: '序号',
+    key: 'index',
+    render: (row: any, index: number) => index + 1,
+    width: 80,
+    align: 'center'
+  },
+  {
+    title: '用户名',
+    key: 'username',
+    width: 150,
+    align: 'center',
+  },
+  {
+    title: '真实姓名',
+    key: 'realName',
+    align: 'center',
+  },
+  {
+    title: '性别',
+    key: 'genderLabel',
+    width: 80,
+    align: 'center',
+  },
+  {
+    title: '角色名称',
+    key: 'roleNames',
+    align: 'center',
+    ellipsis: { tooltip: true },
+  },
+  {
+    title: '部门名称',
+    key: 'deptName',
+    align: 'center',
+  },
+  {
+    title: '手机号码',
+    key: 'mobile',
+    width: 120,
+    align: 'center',
+  },
+  {
+    title: '状态',
+    key: 'status',
+    width: 80,
+    align: 'center',
+    render: (row: any) => {
+      return h(NTag, {
+        type: row.status === 1 ? 'success' : 'info',
+      }, {
+        default: () => row.status === 1 ? '正常' : '禁用'
+      });
+    }
+  },
+  {
+    title: '创建时间',
+    key: 'createTime',
+    width: 160,
+    align: 'center',
+  },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 150,
+    render: (row: any) => {
+      const userStore = useUserStore();
+      const canEdit = userStore.permissions.some((p: string) => p === 'sys:user:edit');
+      const canDelete = userStore.permissions.some((p: string) => p === 'sys:user:delete');
+      
+      return h(NSpace, { justify: 'center' }, {
+        default: () => [
+          h(NButton, {
+            type: 'primary',
+            size: 'small',
+            quaternary: true,
+            disabled: !canEdit,
+            onClick: () => openFormDialog(row.userId),
+          }, { default: () => '编辑' }),
+          h(NButton, {
+            type: 'error',
+            size: 'small',
+            quaternary: true,
+            disabled: !canDelete,
+            onClick: () => handleDelete(row.userId),
+          }, { default: () => '删除' })
+        ]
+      });
+    }
+  }
+];
+
+// 表格分页配置
+const pagination = computed(() => ({
+  page: queryParams.page,
+  pageSize: queryParams.limit,
+  itemCount: total.value,
+  showSizePicker: true,
+  pageSizes: [10, 20, 30, 40, 50, 100],
+  onUpdatePage: (page: number) => {
+    queryParams.page = page;
+    handleQuery();
+  },
+  onUpdatePageSize: (pageSize: number) => {
+    queryParams.limit = pageSize;
+    queryParams.page = 1;
+    handleQuery();
+  }
+}));
 
 // 重置密码
 async function resetPassword() {
@@ -252,6 +367,32 @@ function toggleDeptTree() {
   isDeptTreeVisible.value = !isDeptTreeVisible.value;
 }
 
+// 批量操作下拉菜单选项
+const batchOperationOptions = computed(() => [
+  { label: '批量删除', key: 'delete', disabled: !userIds.value.length },
+  { label: '批量启用', key: 'enable', disabled: !userIds.value.length },
+  { label: '批量禁用', key: 'disable', disabled: !userIds.value.length },
+  { label: '批量重置密码', key: 'password', disabled: !userIds.value.length },
+]);
+
+// 批量操作处理函数
+function handleBatchOperation(key: string) {
+  switch (key) {
+    case 'delete':
+      handleDelete();
+      break;
+    case 'enable':
+      enableUser();
+      break;
+    case 'disable':
+      disableUser();
+      break;
+    case 'password':
+      resetPassword();
+      break;
+  }
+}
+
 onMounted(() => {
   // 初始化用户列表数据
   handleQuery();
@@ -267,19 +408,26 @@ const autoHeight = useAutoHeight(180); // 调整自动高度偏移量
 
 <template>
   <div class="user-container">
-    <!--部门树-->
-    <n-layout :has-sider="true" class="w-full h-full">
-      <n-layout-sider v-if="isDeptTreeVisible" :width="240" :collapsed="false" :show-trigger="false" class="border-r">
+    <n-layout has-sider class="w-full h-full">
+      <n-layout-sider
+        v-if="isDeptTreeVisible"
+        :width="240"
+        :collapsed="!isDeptTreeVisible"
+        collapse-mode="transform"
+        :collapsed-width="0"
+        show-trigger="bar"
+        class="border-r"
+      >
         <div class="tree-container-wrapper">
-        <div class="tree-container-wrapper">
-            <n-input
-              v-model:value="deptName"
-              placeholder="机构名称"
-              style="width: 100%"
-            >
-              <template #prefix>
-                <n-icon><search /></n-icon>
-            </n-input>
+          <n-input
+            v-model:value="deptName"
+            placeholder="机构名称"
+            style="width: 100%; max-width: 240px;"
+          >
+            <template #prefix>
+              <n-icon><Icon icon="mdi:magnify" /></n-icon>
+            </template>
+          </n-input>
 
           <n-scrollbar :style="{height: autoHeight + 'px'}" class="tree-container">
             <n-tree
@@ -297,7 +445,7 @@ const autoHeight = useAutoHeight(180); // 调整自动高度偏移量
           <!-- 收缩按钮 -->
           <div class="toggle-button" @click="toggleDeptTree" v-if="isDeptTreeVisible">
             <n-icon>
-              <ArrowLeft />
+              <Icon icon="mdi:arrow-left" />
             </n-icon>
           </div>
         </div>
@@ -309,13 +457,13 @@ const autoHeight = useAutoHeight(180); // 调整自动高度偏移量
       <!-- 展开按钮（当机构树隐藏时显示） -->
       <div class="expand-button" @click="toggleDeptTree" v-if="!isDeptTreeVisible">
         <n-icon>
-          <ArrowRight />
+          <Icon icon="mdi:arrow-right" />
         </n-icon>
       </div>
 
       <n-layout-content class="h-full">
         <div class="data-container">
-          <n-form :model="queryParams" ref="queryFormRef" :inline="true">
+          <n-form :model="queryParams" ref="queryFormRef" inline>
             <n-form-item path="Keywords">
               <n-input
                 v-model:value="queryParams.Keywords"
@@ -358,16 +506,17 @@ const autoHeight = useAutoHeight(180); // 调整自动高度偏移量
             </n-form-item>
 
             <n-form-item>
+              <n-space>
               <n-button type="primary" @click="handleQuery()">
                 <template #icon>
-                  <n-icon><Search /></n-icon>
+                  <n-icon><Icon icon="mdi:magnify" /></n-icon>
                 </template>
                 搜索
               </n-button>
 
               <n-button type="primary" @click="resetQuery()">
                 <template #icon>
-                  <n-icon><Refresh /></n-icon>
+                  <n-icon><Icon icon="mdi:refresh" /></n-icon>
                 </template>
                 重置
               </n-button>
@@ -378,7 +527,7 @@ const autoHeight = useAutoHeight(180); // 调整自动高度偏移量
                 @click="openFormDialog()"
               >
                 <template #icon>
-                  <n-icon><Plus /></n-icon>
+                  <n-icon><Icon icon="mdi:plus" /></n-icon>
                 </template>
                 新增
               </n-button>
@@ -389,7 +538,7 @@ const autoHeight = useAutoHeight(180); // 调整自动高度偏移量
                 v-access:code="['sys:user:import']"
               >
                 <template #icon>
-                  <n-icon><Upload /></n-icon>
+                  <n-icon><Icon icon="mdi:upload" /></n-icon>
                 </template>
                 导入
               </n-button>
@@ -401,174 +550,33 @@ const autoHeight = useAutoHeight(180); // 调整自动高度偏移量
                 class="mr-3"
               >
                 <template #icon>
-                  <n-icon><Download /></n-icon>
+                  <n-icon><Icon icon="mdi:download" /></n-icon>
                 </template>
                 导出
               </n-button>
+              </n-space>
 
               <n-dropdown
-                trigger="click"
-                :options="[
-                  { label: '批量删除', key: 'delete', disabled: !userIds.length, permission: ['sys:user:delete'] },
-                  { label: '批量启用', key: 'enable', disabled: !userIds.length, permission: ['sys:user:enable'] },
-                  { label: '批量禁用', key: 'disable', disabled: !userIds.length, permission: ['sys:user:disable'] },
-                  { label: '批量重置密码', key: 'password', disabled: !userIds.length, permission: ['sys:user:password'] },
-                ].filter(item => {
-                  const userStore = useUserStore();
-                  const hasPermission = (codes: string | string[]) => {
-                    const permissions = Array.isArray(codes) ? codes : [codes];
-                    return userStore.permissions.some(p => permissions.includes(p));
-                  };
-                  return hasPermission(item.permission);
-                })
-                "
-                @select="(key) => {
-                  if(key === 'delete') handleDelete();
-                  else if(key === 'enable') enableUser();
-                  else if(key === 'disable') disableUser();
-                  else if(key === 'password') resetPassword();
-                }"
+                :options="batchOperationOptions"
+                @select="handleBatchOperation"
               >
                 <n-button type="primary">
-                  批量操作 <n-icon class="ml-2"><arrow-down/></n-icon>
+                  <template #icon>
+                    <Icon icon="mdi:arrow-down" />
+                  </template>
+                  批量操作
                 </n-button>
               </n-dropdown>
 
-
+            </n-form-item>
 
           </n-form>
           <n-data-table
             v-model:checked-row-keys="userIds"
             :loading="loading"
-            :columns="[
-              {
-                type: 'selection',
-                disabled: (row) => false,
-              },
-              {
-                title: '序号',
-                key: 'index',
-                render: (row, index) => index + 1,
-                width: 80,
-                align: 'center'
-              },
-              {
-                title: '编号',
-                key: 'userId',
-                width: 100,
-                align: 'center',
-                render: (row) => row.userId,
-                hide: true
-              },
-              {
-                title: '用户名',
-                key: 'username',
-                width: 150,
-                align: 'center',
-                render: (row) => row.username,
-              },
-              {
-                title: '真实姓名',
-                key: 'realName',
-                align: 'center',
-                render: (row) => row.realName,
-              },
-              {
-                title: '性别',
-                key: 'genderLabel',
-                width: 80,
-                align: 'center',
-                render: (row) => row.genderLabel,
-              },
-              {
-                title: '角色名称',
-                key: 'roleNames',
-                align: 'center',
-                render: (row) => row.roleNames,
-                ellipsis: { tooltip: true },
-              },
-              {
-                title: '部门名称',
-                key: 'deptName',
-                align: 'center',
-                render: (row) => row.deptName,
-              },
-              {
-                title: '手机号码',
-                key: 'mobile',
-                width: 120,
-                align: 'center',
-                render: (row) => row.mobile,
-              },
-              {
-                title: '状态',
-                key: 'status',
-                width: 80,
-                align: 'center',
-                render: (row) => {
-                  return h(NTag, {
-                    type: row.status === 1 ? 'success' : 'info',
-                  }, {
-                    default: () => row.status === 1 ? '正常' : '禁用'
-                  });
-                }
-              },
-              {
-                title: '创建时间',
-                key: 'createTime',
-                width: 160,
-                align: 'center',
-                render: (row) => row.createTime,
-              },
-              {
-                title: '操作',
-                key: 'actions',
-                width: 150,
-                render: (row) => {
-                  return h(NSpace, null, {
-                    default: () => [
-                      h(NButton, {
-                        type: 'primary',
-                        size: 'small',
-                        quaternary: true,
-                        onClick: () => openFormDialog(row.userId),
-                        disabled: !(() => {
-                          const userStore = useUserStore();
-                          return userStore.permissions.some(p => p === 'sys:user:edit');
-                        })()
-                      }, { default: () => '编辑' }),
-                      h(NButton, {
-                        type: 'error',
-                        size: 'small',
-                        quaternary: true,
-                        onClick: () => handleDelete(row.userId),
-                        disabled: !(() => {
-                          const userStore = useUserStore();
-                          return userStore.permissions.some(p => p === 'sys:user:delete');
-                        })()
-                      }, { default: () => '删除' })
-                    ]
-                  });
-                }
-              }
-            ]"
+            :columns="tableColumns"
             :data="userTableData"
-            :pagination="{
-              page: queryParams.page,
-              pageSize: queryParams.limit,
-              itemCount: total,
-              showSizePicker: true,
-              pageSizes: [10, 20, 30, 40, 50, 100],
-              onUpdatePage: (page) => {
-                queryParams.page = page;
-                handleQuery();
-              },
-              onUpdatePageSize: (pageSize) => {
-                queryParams.limit = pageSize;
-                queryParams.page = 1;
-                handleQuery();
-              }
-            }"
+            :pagination="pagination"
             :scroll-x="1000"
           />
         </div>

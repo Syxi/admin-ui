@@ -16,7 +16,7 @@ import {
 import {useCardHeight} from "#/hooks/useCardHeight";
 import CategoryFormDialog from "#/views/system/article/category/CategoryFormDialog.vue";
 import {useTableHeight} from "#/hooks/useTableHeight";
-import { Search, Refresh, Plus, Delete, Edit } from '@vben/icons';
+import { Icon } from '@iconify/vue';
 
 defineOptions({
   name: 'Category',
@@ -123,14 +123,14 @@ function openDialog(categoryId?: string) {
         <NFormItem>
           <NButton type="primary" @click="handleQuery()">
             <template #icon>
-              <NIcon><Search /></NIcon>
+              <NIcon><Icon icon="mdi:magnify" /></NIcon>
             </template>
             搜索
           </NButton>
 
           <NButton type="primary" @click="resetQuery()">
             <template #icon>
-              <NIcon><Refresh /></NIcon>
+              <NIcon><Icon icon="mdi:refresh" /></NIcon>
             </template>
             重置
           </NButton>
@@ -141,7 +141,7 @@ function openDialog(categoryId?: string) {
             v-access:code="['category:add']"
           >
             <template #icon>
-              <NIcon><Plus /></NIcon>
+              <NIcon><Icon icon="mdi:plus" /></NIcon>
             </template>
             新增
           </NButton>
@@ -152,7 +152,7 @@ function openDialog(categoryId?: string) {
             v-access:code="['category:delete']"
           >
             <template #icon>
-              <NIcon><Delete /></NIcon>
+              <NIcon><Icon icon="mdi:delete" /></NIcon>
             </template>
             删除
           </NButton>

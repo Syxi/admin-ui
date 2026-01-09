@@ -19,7 +19,7 @@ import {
 import { useCardHeight } from '#/hooks/useCardHeight';
 import ScheduledJobFormDialog from '#/views/system/quartz/scheduledJob/ScheduledJobFormDialog.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
-import { Search, Refresh, Plus, Delete, VideoPlay, Edit, CircleClose } from '@vben/icons';
+import { Icon } from '@iconify/vue';
 
 defineOptions({
   name: 'ScheduledJob',
@@ -227,14 +227,14 @@ const { tableHeight } = useTableHeight(queryFormRef);
         <NFormItem>
           <NButton type="primary" @click="handleQuery">
             <template #icon>
-              <NIcon><Search /></NIcon>
+              <NIcon><Icon icon="mdi:magnify" /></NIcon>
             </template>
             搜索
           </NButton>
 
           <NButton type="primary" @click="resetQuery">
             <template #icon>
-              <NIcon><Refresh /></NIcon>
+              <NIcon><Icon icon="mdi:refresh" /></NIcon>
             </template>
             重置
           </NButton>
@@ -245,7 +245,7 @@ const { tableHeight } = useTableHeight(queryFormRef);
             v-access:code="['sys:scheduledJob:add']"
           >
             <template #icon>
-              <NIcon><Plus /></NIcon>
+              <NIcon><Icon icon="mdi:plus" /></NIcon>
             </template>
             新增
           </NButton>
@@ -256,7 +256,7 @@ const { tableHeight } = useTableHeight(queryFormRef);
             @click="executeJobs()"
           >
             <template #icon>
-              <NIcon><VideoPlay /></NIcon>
+              <NIcon><Icon icon="mdi:play" /></NIcon>
             </template>
             启用
           </NButton>
@@ -267,7 +267,7 @@ const { tableHeight } = useTableHeight(queryFormRef);
             @click="pauseJobs()"
           >
             <template #icon>
-              <NIcon><VideoPlay /></NIcon>
+              <NIcon><Icon icon="mdi:stop" /></NIcon>
             </template>
             暂停
           </NButton>
@@ -279,7 +279,7 @@ const { tableHeight } = useTableHeight(queryFormRef);
             @click="handleDelete()"
           >
             <template #icon>
-              <NIcon><Delete /></NIcon>
+              <NIcon><Icon icon="mdi:delete" /></NIcon>
             </template>
             删除
           </NButton>

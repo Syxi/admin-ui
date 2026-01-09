@@ -7,9 +7,8 @@ import { generateAccessible } from '@vben/access';
 import { preferences } from '@vben/preferences';
 import { cloneDeep } from '@vben/utils';
 
-import { useMessage } from 'naive-ui';
-
 import { getAllMenusApi } from '#/api';
+import { message } from '#/adapter/naive';
 import { BasicLayout, IFrameView } from '#/layouts';
 import { $t } from '#/locales';
 import localRoutes from '#/router/routes/modules/localRoutes';
@@ -27,7 +26,6 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
   return await generateAccessible(preferences.app.accessMode, {
     ...options,
     fetchMenuListAsync: async () => {
-      const message = useMessage();
       message.loading(`${$t('common.loadingMenu')}...`, {
         duration: 1.5,
       });

@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import type { NotificationItem } from '@vben/layouts';
 
-import { computed, ref, watch } from 'vue';
+import { computed, h, ref, watch } from 'vue';
 
 import { AuthenticationLoginExpiredModal } from '@vben/common-ui';
 import { VBEN_DOC_URL, VBEN_GITHUB_URL } from '@vben/constants';
 import { useWatermark } from '@vben/hooks';
-import { BookOpenText, CircleHelp, MdiGithub } from '@vben/icons';
+import { Icon } from '@iconify/vue';
 import {
   BasicLayout,
   LockScreen,
@@ -67,7 +67,7 @@ const menus = computed(() => [
         target: '_blank',
       });
     },
-    icon: BookOpenText,
+    icon: () => h(Icon, { icon: 'mdi:book-open-variant' }),
     text: $t('ui.widgets.document'),
   },
   {
@@ -76,7 +76,7 @@ const menus = computed(() => [
         target: '_blank',
       });
     },
-    icon: MdiGithub,
+    icon: () => h(Icon, { icon: 'mdi:github' }),
     text: 'GitHub',
   },
   {
@@ -85,7 +85,7 @@ const menus = computed(() => [
         target: '_blank',
       });
     },
-    icon: CircleHelp,
+    icon: () => h(Icon, { icon: 'mdi:help-circle' }),
     text: $t('ui.widgets.qa'),
   },
 ]);

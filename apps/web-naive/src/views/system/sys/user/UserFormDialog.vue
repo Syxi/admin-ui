@@ -36,27 +36,35 @@ const dialog = reactive({
 });
 
 // 校验规则
-const rules = reactive({
-  username: [{ required: true, message: '登录账号不能为空', trigger: 'blur' }],
-  realName: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
-  deptId: [{ required: true, message: '所属部门不能为空', trigger: 'blur' }],
-  // password: [{ required: true, message: "密码不能为空", trigger: 'blur'}],
-  // roleIds: [{ required: true, message: "用户角色不能为空", trigger: "blur" }],
-  email: [
-    {
-      pattern: /\w[-\w.+]*@([A-Z0-9][-A-Z0-9]+\.)+[A-Z]{2,14}/i,
-      message: '请输入正确的邮箱地址',
-      trigger: 'blur',
-    },
-  ],
-  mobile: [
-    {
-      pattern: /^1[3-9|]\d{9}$/,
-      message: '请输入正确的手机号码',
-      trigger: 'blur',
-    },
-  ],
-});
+const rules = {
+  username: {
+    required: true,
+    message: '登录账号不能为空',
+    trigger: ['input', 'blur']
+  },
+  realName: {
+    required: true,
+    message: '用户名不能为空',
+    trigger: ['input', 'blur']
+  },
+  deptId: {
+    required: true,
+    message: '所属部门不能为空',
+    trigger: ['input', 'blur']
+  },
+  // password: { required: true, message: "密码不能为空", trigger: 'blur'},
+  // roleIds: { required: true, message: "用户角色不能为空", trigger: "blur" },
+  email: {
+    pattern: /\w[-\w.+]*@([A-Z0-9][-A-Z0-9]+\.)+[A-Z]{2,14}/i,
+    message: '请输入正确的邮箱地址',
+    trigger: ['input', 'blur'],
+  },
+  mobile: {
+    pattern: /^1[3-9|]\d{9}$/, 
+    message: '请输入正确的手机号码',
+    trigger: ['input', 'blur'],
+  },
+};
 
 function resetForm() {
   userFormRef.value.resetFields();
@@ -91,9 +99,12 @@ function closeDialog() {
 
 // 提交表单
 const handleSubmit = async () => {
-  // 验证表单字段
-  const valid = userFormRef.value.validate();
-  if (!valid) return;
+  try {
+    await userFormRef.value.validate();
+  } catch (error) {
+    console.error('表单验证失败:', error);
+    return;
+  }
 
   loading.value = true;
 

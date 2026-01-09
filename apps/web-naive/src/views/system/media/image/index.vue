@@ -15,7 +15,7 @@ import { useCardHeight } from '#/hooks/useCardHeight';
 import ImageFormDialog from '#/views/system/media/image/ImageFormDialog.vue';
 import ImageUploadDialog from '#/views/system/media/image/ImageUploadDialog.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
-import { Search, Refresh, Delete, Upload } from '@vben/icons';
+import { Icon } from '@iconify/vue';
 
 defineOptions({
   name: 'Image',
@@ -167,14 +167,14 @@ function openUploadDialog() {
         <NFormItem>
           <NButton type="primary" @click="handleQuery()">
             <template #icon>
-              <NIcon><Search /></NIcon>
+              <NIcon><Icon icon="mdi:magnify" /></NIcon>
             </template>
             搜索
           </NButton>
 
           <NButton type="primary" @click="resetQuery()">
             <template #icon>
-              <NIcon><Refresh /></NIcon>
+              <NIcon><Icon icon="mdi:refresh" /></NIcon>
             </template>
             重置
           </NButton>
@@ -186,7 +186,7 @@ function openUploadDialog() {
             v-access:code="['sys:image:delete']"
           >
             <template #icon>
-              <NIcon><Delete /></NIcon>
+              <NIcon><Icon icon="mdi:delete" /></NIcon>
             </template>
             删除
           </NButton>
@@ -196,7 +196,7 @@ function openUploadDialog() {
             v-access:code="['sys:image:upload']"
             @click="openUploadDialog()"
           >
-            <NIcon><Upload /></NIcon>上传图片
+            <NIcon><Icon icon="mdi:upload" /></NIcon>上传图片
           </NButton>
         </NFormItem>
       </NForm>

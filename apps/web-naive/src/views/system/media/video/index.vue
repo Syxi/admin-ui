@@ -15,7 +15,7 @@ import { useCardHeight } from '#/hooks/useCardHeight';
 import VideoPlayerDialog from '#/views/system/media/video/VideoPlayerDialog.vue';
 import VideoUploadDialog from '#/views/system/media/video/VideoUploadDialog.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
-import { Search, Refresh, Delete, Upload } from '@vben/icons';
+import { Icon } from '@iconify/vue';
 
 // import 'video.js/dist/video-js.css';
 
@@ -164,14 +164,14 @@ onMounted(() => {
         <NFormItem>
           <NButton type="primary" @click="handleQuery()">
             <template #icon>
-              <NIcon><Search /></NIcon>
+              <NIcon><Icon icon="mdi:magnify" /></NIcon>
             </template>
             搜索
           </NButton>
 
           <NButton type="primary" @click="resetQuery()">
             <template #icon>
-              <NIcon><Refresh /></NIcon>
+              <NIcon><Icon icon="mdi:refresh" /></NIcon>
             </template>
             重置
           </NButton>
@@ -183,7 +183,7 @@ onMounted(() => {
             @click="handleDeleteVideo()"
           >
             <template #icon>
-              <NIcon><Delete /></NIcon>
+              <NIcon><Icon icon="mdi:delete" /></NIcon>
             </template>
             删除
           </NButton>
@@ -193,7 +193,7 @@ onMounted(() => {
             v-access:code="['sys:video:upload']"
             @click="openUploadDialog()"
           >
-            <NIcon><Upload /></NIcon>上传视频
+            <NIcon><Icon icon="mdi:upload" /></NIcon>上传视频
           </NButton>
         </NFormItem>
       </NForm>

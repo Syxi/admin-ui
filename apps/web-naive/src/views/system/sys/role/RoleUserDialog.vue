@@ -138,17 +138,17 @@ defineExpose({ openUserDialog });
 </template>
 <style scoped>
 /* 穿梭框宽度和高度调整 */
-.el-transfer {
-  --el-transfer-panel-width: 300px;
-  --el-transfer-border-color: var(--el-border-color-lighter);
-  --el-transfer-border-radius: var(--el-border-radius-base);
-  /* stylelint-disable-next-line declaration-block-no-duplicate-custom-properties */
-  --el-transfer-panel-width: 300px;
-  --el-transfer-panel-header-height: 40px;
-  --el-transfer-panel-header-bg-color: var(--el-fill-color-light);
-  --el-transfer-panel-footer-height: 60px;
-  --el-transfer-panel-body-height: 500px;
-  --el-transfer-item-height: 30px;
-  --el-transfer-filter-height: 32px;
+:deep(.n-transfer) {
+  .n-transfer-list {
+    width: 300px;
+    height: 500px;
+  }
+  .n-transfer-list-header {
+    height: 40px;
+    background-color: var(--n-item-color-hover);
+  }
+  .n-transfer-list-footer {
+    height: 60px;
+  }
 }
 </style>

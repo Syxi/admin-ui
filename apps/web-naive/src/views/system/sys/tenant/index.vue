@@ -1,19 +1,30 @@
 <script setup lang="ts">
 import type { TenantPage, TenantQuery } from '#/api/system/sys/tenant';
 
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref, computed, h } from 'vue';
 
-import { NForm, NFormItem, NInput, NButton, NTable, NPopconfirm, NTag, NPagination, useMessage } from 'naive-ui';
-import { Search, Refresh, Plus, Delete, Edit, User } from '@vben/icons';
+import { Icon } from '@iconify/vue';
+import { 
+  NForm,
+  NFormItem,
+  NInput,
+  NButton,
+  NTable,
+  NTag,
+  NPagination,
+  useMessage,
+  useDialog
+} from 'naive-ui';
 
 import {
   deleteTenantApi,
   selectTenantPageApi,
 } from '#/api/system/sys/tenant';
+import { useCardHeight } from '#/hooks/useCardHeight';
 import TenantFormDialog from '#/views/system/sys/tenant/TenantFormDialog.vue';
 import TenantUserDialog from '#/views/system/sys/tenant/TenantUserDialog.vue';
-
-const message = useMessage();
+import TenantPackageAssignDialog from '#/views/system/sys/tenantPackage/TenantPackageAssignDialog.vue';
+import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({
   name: 'Tenant',
@@ -21,6 +32,8 @@ defineOptions({
 });
 
 const queryFormRef = ref();
+const message = useMessage();
+const dialog = useDialog();
 
 const loading = ref(false);
 
@@ -34,8 +47,6 @@ const queryParams = reactive<TenantQuery>({
 });
 
 const tenantTableData = ref<TenantPage[]>();
-const currentRow = ref();
-const dataTableRef = ref();
 
 // 租户表单组件
 const tenantFormDialogRef = ref();
@@ -61,6 +72,9 @@ function openTenantMenuDrawer(id: string, tenantName: string) {
 // 租户用户组件
 const tenantUserDialogRef = ref();
 
+// 租户套餐授权组件
+const tenantPackageAssignDialogRef = ref();
+
 /**
  * 打开租户分配用户弹窗
  * @param id
@@ -68,6 +82,15 @@ const tenantUserDialogRef = ref();
  */
 function openTenantUserDialog(id: string, tenantName: string) {
   tenantUserDialogRef.value.openUserDialog(id, tenantName);
+}
+
+/**
+ * 打开租户套餐授权弹窗
+ * @param id
+ * @param tenantName
+ */
+function openTenantPackageAssignDialog(id: string, tenantName: string) {
+  tenantPackageAssignDialogRef.value.open(id, tenantName);
 }
 
 /**
@@ -118,234 +141,267 @@ function handleDelete(id?: string) {
     return;
   }
 
-  if (confirm('确定删除已选中的数据?')) {
+  dialog.warning({
+    title: '警告',
+    content: '确定删除已选中的数据?',
+    positiveText: '确定',
+    negativeText: '取消',
+    onPositiveClick: async () => {
     loading.value = true;
     deleteTenantApi(ids)
       .then(() => {
         message.success('删除成功');
         resetQuery();
-      })
-      .finally(() => {
+      } catch (error) {
+        console.error('删除失败:', error);
+      } finally {
         loading.value = false;
-      });
-  }
+      }
+    }
+  });
 }
 
-// 选择所有行
-function selectAllRows() {
-  if (tenantTableData.value) {
-    tenantIds.value = tenantTableData.value.map(item => item.id);
-  }
-}
-
-// 取消选择所有行
-function unselectAllRows() {
-  tenantIds.value = [];
-}
-
-// 选择单行
-function selectRow(row: any) {
-  if (!tenantIds.value.includes(row.id)) {
-    tenantIds.value.push(row.id);
-  }
-}
-
-// 取消选择单行
-function unselectRow(row: any) {
-  const index = tenantIds.value.indexOf(row.id);
-  if (index > -1) {
-    tenantIds.value.splice(index, 1);
-  }
-}
+const { tableHeight } = useTableHeight(queryFormRef);
 
 onMounted(() => {
   handleQuery();
 });
+
+// 表格列定义
+const tableColumns = [
+  {
+    type: 'selection',
+    align: 'center',
+    width: 80,
+  },
+  {
+    title: '序号',
+    key: 'index',
+    width: 80,
+    align: 'center',
+    render: (row, index) => index + 1,
+  },
+  {
+    title: '租户名称',
+    key: 'name',
+    width: 200,
+    align: 'center',
+  },
+  {
+    title: '租户编码',
+    key: 'code',
+    width: 200,
+    align: 'center',
+  },
+  {
+    title: '状态',
+    key: 'status',
+    width: 120,
+    align: 'center',
+    render: (row) => {
+      return h(NTag, {
+        type: row.status === 1 ? 'success' : 'info'
+      }, {
+        default: () => row.status === 1 ? '正常' : '禁用'
+      });
+    }
+  },
+  {
+    title: '排序',
+    key: 'sort',
+    width: 100,
+    align: 'center',
+    sorter: 'default'
+  },
+  {
+    title: '创建时间',
+    key: 'createTime',
+    width: 200,
+    align: 'center',
+    sorter: 'default'
+  },
+  {
+    title: '更新时间',
+    key: 'updateTime',
+    width: 200,
+    align: 'center',
+    sorter: 'default'
+  },
+  {
+    title: '操作',
+    key: 'actions',
+    align: 'center',
+    width: 350,
+    render: (row) => {
+      return h('div', { style: { display: 'flex', justifyContent: 'center', gap: '8px' } }, [
+        h(NButton, {
+          type: 'primary',
+          size: 'small',
+          quaternary: true,
+          onClick: () => openTenantUserDialog(row.id, row.name),
+          vAccessCode: ['sys:tenant:user:add']
+        }, { default: () => [
+          h(NIcon, null, { default: () => h(Icon, { icon: 'mdi:account' }) })
+          '分配用户'
+        ]}),
+        h(NButton, {
+          type: 'success',
+          size: 'small',
+          quaternary: true,
+          onClick: () => openTenantPackageAssignDialog(row.id, row.name),
+          vAccessCode: ['sys:tenantPackage:assign']
+        }, { default: () => [
+          h(NIcon, null, { default: () => h(Icon, { icon: 'mdi:key' }) })
+          '套餐授权'
+        ]}),
+        h(NButton, {
+          type: 'primary',
+          size: 'small',
+          quaternary: true,
+          vAccessCode: ['sys:tenant:edit'],
+          onClick: () => openTenantDialog(row.id)
+        }, { default: () => [
+          h(NIcon, null, { default: () => h(Icon, { icon: 'mdi:pencil' }) })
+          '编辑'
+        ]}),
+        h(NButton, {
+          type: 'primary',
+          size: 'small',
+          quaternary: true,
+          vAccessCode: ['sys:tenant:delete'],
+          onClick: () => handleDelete(row.id)
+        }, { default: () => [
+          h(NIcon, null, { default: () => h(Icon, { icon: 'mdi:delete' }) })
+          '删除'
+        ]})
+      ]);
+    }
+  }
+];
+
+// 分页配置
+const pagination = computed(() => ({
+  page: queryParams.page,
+  pageSize: queryParams.limit,
+  itemCount: total.value,
+  showSizePicker: true,
+  pageSizes: [10, 20, 30, 40, 50],
+  onUpdatePage: (page: number) => {
+    queryParams.page = page;
+    handleQuery();
+  },
+  onUpdatePageSize: (pageSize: number) => {
+    queryParams.limit = pageSize;
+    handleQuery();
+  }
+}));
 </script>
 
 <template>
   <div class="app-container">
-      <NForm
+      <n-form
         ref="queryFormRef"
         :model="queryParams"
         :inline="true"
-        @submit.prevent
+        @submit.prevent="handleQuery"
       >
-        <NFormItem prop="name">
-          <NInput
+        <n-form-item prop="name">
+          <n-input
             v-model:value="queryParams.name"
             placeholder="租户名称"
             clearable
             style="width: 240px"
             @keyup.enter="handleQuery"
           />
-        </NFormItem>
+        </n-form-item>
 
-        <NFormItem>
-          <NButton type="primary" @click="handleQuery">
+        <n-form-item>
+          <n-button attr-type="button" type="primary" @click="handleQuery">
             <template #icon>
-              <Search />
+              <n-icon><Icon icon="mdi:magnify" /></n-icon>
             </template>
             搜索
-          </NButton>
+          </n-button>
 
-          <NButton type="primary" @click="resetQuery">
+          <n-button attr-type="button" type="primary" @click="resetQuery">
             <template #icon>
-              <Refresh />
+              <n-icon><Icon icon="mdi:refresh" /></n-icon>
             </template>
             重置
-          </NButton>
+          </n-button>
 
-          <NButton
+          <n-button
             type="primary"
             v-access:code="['sys:tenant:add']"
             @click="openTenantDialog()"
           >
             <template #icon>
-              <Plus />
+              <n-icon><Icon icon="mdi:plus" /></n-icon>
             </template>
             新增
-          </NButton>
+          </n-button>
 
-          <NButton
+          <n-button
             type="error"
             :disabled="tenantIds.length === 0"
             v-access:code="['sys:tenant:delete']"
             @click="handleDelete()"
           >
             <template #icon>
-              <Delete />
+              <n-icon><Icon icon="mdi:delete" /></n-icon>
             </template>
             删除
-          </NButton>
-        </NFormItem>
-      </NForm>
-      <NTable
+          </n-button>
+        </n-form-item>
+      </n-form>
+      <n-data-table
         ref="dataTableRef"
-        :data="tenantTableData"
-        :bordered="true"
-        :single-line="false"
         :loading="loading"
-      >
-        <thead>
-          <tr>
-            <th style="width: 80px; text-align: center;">
-              <input
-                type="checkbox"
-                @change="(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (target.checked) {
-                    // 选中所有行
-                    tenantTableData?.forEach(row => {
-                      if (!tenantIds.value.includes(row.id)) {
-                        tenantIds.value.push(row.id);
-                      }
-                    });
-                  } else {
-                    // 取消选中所有行
-                    tenantIds.value.splice(0);
-                  }
-                }"
-              />
-            </th>
-            <th style="width: 80px; text-align: center;">序号</th>
-            <th style="width: 200px; text-align: center;">租户名称</th>
-            <th style="width: 200px; text-align: center;">租户编码</th>
-            <th style="width: 120px; text-align: center;">状态</th>
-            <th style="width: 100px; text-align: center;">排序</th>
-            <th style="width: 200px; text-align: center;">创建时间</th>
-            <th style="width: 200px; text-align: center;">更新时间</th>
-            <th style="text-align: center;">操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(row, index) in tenantTableData"
-            :key="row.id"
-            :class="{ 'n-table--row-current': row.id === currentRow?.id }"
-            @click="currentRow = row"
-          >
-            <td style="text-align: center;">
-              <input
-                type="checkbox"
-                :checked="tenantIds.value.includes(row.id)"
-                @change="(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (target.checked) {
-                    if (!tenantIds.value.includes(row.id)) {
-                      tenantIds.value.push(row.id);
-                    }
-                  } else {
-                    const index = tenantIds.value.indexOf(row.id);
-                    if (index > -1) {
-                      tenantIds.value.splice(index, 1);
-                    }
-                  }
-                }"
-              />
-            </td>
-            <td style="text-align: center;">{{ (queryParams.page - 1) * queryParams.limit + index + 1 }}</td>
-            <td style="text-align: center;">{{ row.name }}</td>
-            <td style="text-align: center;">{{ row.code }}</td>
-            <td style="text-align: center;">
-              <NTag v-if="row.status === 1" type="success">正常</NTag>
-              <NTag v-else type="info">禁用</NTag>
-            </td>
-            <td style="text-align: center;">{{ row.sort }}</td>
-            <td style="text-align: center;">{{ row.createTime }}</td>
-            <td style="text-align: center;">{{ row.updateTime }}</td>
-            <td style="text-align: center;">
-              <NButton
-                type="primary"
-                size="small"
-                quaternary
-                @click="openTenantUserDialog(row.id, row.name)"
-                v-access:code="['sys:tenant:user:add']"
-              >
-                <template #icon>
-                  <User />
-                </template>
-                分配用户
-              </NButton>
-
-              <NButton
-                type="primary"
-                size="small"
-                quaternary
-                v-access:code="['sys:tenant:edit']"
-                @click="openTenantDialog(row.id)"
-              >
-                <template #icon>
-                  <Edit />
-                </template>
-                编辑
-              </NButton>
-
-              <NButton
-                type="primary"
-                size="small"
-                quaternary
-                v-access:code="['sys:tenant:delete']"
-                @click="handleDelete(row.id)"
-              >
-                <template #icon>
-                  <Delete />
-                </template>
-                删除
-              </NButton>
-            </td>
-          </tr>
-        </tbody>
-      </NTable>
-      <NPagination
-        v-if="total > 0"
-        v-model:page="queryParams.page"
-        v-model:page-size="queryParams.limit"
-        :item-count="total"
-        :page-sizes="[10, 20, 30, 40, 50, 100]"
-        @update:page="handleQuery"
-        @update:page-size="handleQuery"
+        :data="tenantTableData"
+        :columns="tableColumns"
+        :pagination="pagination"
+        :row-key="(row) => row.id"
+        @update-checked-row-keys="handleSelectionChange"
+        :scroll-x="1200"
+        flex-height
+        :style="{ height: `${tableHeight}px` }"
       />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <div v-if="total > 0" class="pagination-container" style="margin-top: 16px;">
+        <n-space justify="center">
+          <n-pagination
+            v-model:page="queryParams.page"
+            v-model:page-size="queryParams.limit"
+            :item-count="total"
+            :page-sizes="[
+              { label: '10/页', value: 10 },
+              { label: '20/页', value: 20 },
+              { label: '30/页', value: 30 },
+              { label: '50/页', value: 50 },
+              { label: '100/页', value: 100 }
+            ]"
+            @update-page="handleQuery"
+            @update-page-size="handleQuery"
+            show-size-picker
+            show-quick-jumper
+          />
+        </n-space>
+      </div>
 
     <TenantFormDialog ref="tenantFormDialogRef" @success="handleQuery" />
 
