@@ -41,7 +41,7 @@
     "@vben/types": "workspace:*",
     "@vben/utils": "workspace:*",
     "@vueuse/core": "catalog:",
-    "jsencrypt": "^3.3.2",
+    "jsencrypt": "^3.5.4",
     "naive-ui": "catalog:",
     "pinia": "catalog:",
     "vue": "catalog:",
