@@ -52,6 +52,58 @@ html .el-loading-mask {
   z-index: 1000;
 }
 
+/* 全局为el-dialog添加头部和页脚分割线 */
+/* 对话框整体容器添加边框以确保分割线占满宽度 */
+.el-dialog {
+  overflow: hidden;
+}
+
+/* 全局为el-dialog添加头部分割线，扩展到整个容器宽度 */
+.el-dialog__header {
+  border-bottom: 1px solid #dfe1e6;
+  margin-left: calc(-1 * var(--el-dialog-padding-primary, 16px));
+  margin-right: calc(-1 * var(--el-dialog-padding-primary, 16px));
+  padding-left: var(--el-dialog-padding-primary, 16px);
+  padding-right: var(--el-dialog-padding-primary, 16px);
+  width: calc(100% + 2 * var(--el-dialog-padding-primary, 16px));
+}
+
+/* 全局为el-dialog添加页脚分割线，扩展到整个容器宽度 */
+.el-dialog__footer {
+  border-top: 1px solid #dfe1e6;
+  margin-left: calc(-1 * var(--el-dialog-padding-primary, 16px));
+  margin-right: calc(-1 * var(--el-dialog-padding-primary, 16px));
+  padding-left: var(--el-dialog-padding-primary, 16px);
+  padding-right: var(--el-dialog-padding-primary, 16px);
+  width: calc(100% + 2 * var(--el-dialog-padding-primary, 16px));
+}
+
+.el-dialog .el-dialog__body {
+  padding: 20px 20px 20px 20px;
+}
+/* 全局为el-dialog添加头部和页脚分割线结束 */
+
+/* 为el-drawer添加头部和底部分割线 */
+.el-drawer__header {
+  border-bottom: 1px solid #dfe1e6;
+  margin: 0 !important;
+  padding: 20px 20px 15px 20px !important;
+  width: calc(100% + 2 * var(--el-drawer-padding-primary, 20px));
+  margin-left: calc(-1 * var(--el-drawer-padding-primary, 20px));
+  margin-right: calc(-1 * var(--el-drawer-padding-primary, 20px));
+}
+
+.el-drawer__footer {
+  border-top: 1px solid #dfe1e6;
+  padding: 15px 20px 20px 20px;
+  width: calc(100% + 2 * var(--el-drawer-padding-primary, 20px));
+  margin-left: calc(-1 * var(--el-drawer-padding-primary, 20px));
+  margin-right: calc(-1 * var(--el-drawer-padding-primary, 20px));
+  box-sizing: border-box;
+}
+/* 为el-drawer添加头部和底部分割线 */
+
+
 /* 覆盖所有 el-table 表头的字体样式 */
 .el-table th {
   font-size: 14px; /* 设置字体大小 */
