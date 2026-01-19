@@ -110,6 +110,7 @@ defineExpose({ openUploadDialog });
     v-model="dialog.visible"
     :title="dialog.title"
     width="800"
+    center
     @close="closeDialog()"
   >
     <el-upload

@@ -94,6 +94,7 @@ defineExpose({ openDialog });
     v-model="dialog.visible"
     title="上传文件"
     width="800"
+    center
     @close="closeDialog()"
   >
     <el-upload

@@ -3,6 +3,7 @@
     v-model="visible"
     :title="title"
     width="800px"
+    center
     @close="close"
   >
     <el-form

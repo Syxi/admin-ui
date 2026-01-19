@@ -3,6 +3,7 @@
     v-model="dialog.visible"
     :title="dialog.title"
     width="800"
+    center
     @close="closeDialog()"
   >
     <!-- 媒体类型选择 -->

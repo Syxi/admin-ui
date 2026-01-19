@@ -112,6 +112,7 @@ defineExpose({ openUploadDialog });
     :title="uploadDialog.title"
     :width="600"
     :close-on-click-modal="false"
+    center
     @close="closeUploadDialog"
   >
     <el-upload
