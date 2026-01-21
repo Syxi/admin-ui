@@ -35,6 +35,7 @@ const rules = reactive({
   positionName: [
     { required: true, message: '请输入岗位名称', trigger: 'blur' },
   ],
+  deptId: [{ required: true, message: '请选择机构', trigger: 'change' }],
 });
 
 /**
