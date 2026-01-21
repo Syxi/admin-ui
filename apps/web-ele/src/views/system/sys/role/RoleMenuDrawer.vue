@@ -182,7 +182,7 @@ defineExpose({ openMenuDialog });
     </ElTree>
 
     <template #footer>
-      <div class="flex-center">
+      <div>
         <el-button @click="closeMenuDialog">取消</el-button>
         <el-button type="primary" @click="handleRoleMenuSubmit">
           确定

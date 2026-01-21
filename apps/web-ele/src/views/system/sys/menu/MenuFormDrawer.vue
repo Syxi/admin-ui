@@ -143,7 +143,6 @@ onMounted(() => {
     @close="closeDialog"
     resizable
   >
-    <div class="">
       <ElForm
         ref="menuFormRef"
         :model="formData"
@@ -337,19 +336,19 @@ onMounted(() => {
           formData.menuType === MenuTypeEnum.CATALOG ||
           formData.menuType === MenuTypeEnum.MENU
         "
-        label="根目录始终显示"
+        label="是否显示"
       >
-        <template #label>
-          <div>
-            是否始终显示
-            <el-tooltip placement="bottom" effect="light">
-              <template #content>
-                当设置为始终显示时，即使只有一个子菜单也会显示
-              </template>
-              <i-ep-QuestionFilled class="inline-block" />
-            </el-tooltip>
-          </div>
-        </template>
+<!--        <template #label>-->
+<!--          <div>-->
+<!--            是否始终显示-->
+<!--            <el-tooltip placement="bottom" effect="light">-->
+<!--              <template #content>-->
+<!--                当设置为始终显示时，即使只有一个子菜单也会显示-->
+<!--              </template>-->
+<!--              <i-ep-QuestionFilled class="inline-block" />-->
+<!--            </el-tooltip>-->
+<!--          </div>-->
+<!--        </template>-->
 
         <el-radio-group v-model="formData.alwaysShow">
           <el-radio :value="1">是</el-radio>
@@ -396,7 +395,6 @@ onMounted(() => {
         <el-input v-model="formData.redirect" placeholder="跳转路由" />
       </el-form-item>
     </ElForm>
-    </div>
     <template #footer>
         <el-button @click="closeDialog">取消</el-button>
         <el-button type="primary" @click="submitForm">确定</el-button>

@@ -89,14 +89,10 @@ defineExpose({ openDialog });
 <template>
   <el-drawer
     v-model="dialog.visible"
+    :title="dialog.title"
     @close="closeDialog()"
     size="50%"
   >
-    <template #header>
-      <div class="flex justify-center">
-        <h1>{{ dialog.title }}</h1>
-      </div>
-    </template>
     <ElForm
       ref="dataFormRef"
       :model="formData"
@@ -168,7 +164,7 @@ defineExpose({ openDialog });
     </ElForm>
 
     <template #footer>
-      <div class="flex justify-center">
+      <div >
         <el-button type="primary" @click="closeDialog()">取消</el-button>
         <el-button type="primary" @click="handleSubmit()">确定</el-button>
       </div>

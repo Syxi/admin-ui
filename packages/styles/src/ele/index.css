@@ -87,19 +87,30 @@ html .el-loading-mask {
 .el-drawer__header {
   border-bottom: 1px solid #dfe1e6;
   margin: 0 !important;
-  padding: 20px 20px 15px 20px !important;
+  padding: 20px 20px 20px 20px !important;
   width: calc(100% + 2 * var(--el-drawer-padding-primary, 20px));
   margin-left: calc(-1 * var(--el-drawer-padding-primary, 20px));
   margin-right: calc(-1 * var(--el-drawer-padding-primary, 20px));
+  text-align: center;
 }
+
+.el-drawer .el-drawer__body {
+  padding: 20px 20px 20px 20px;
+}
+
+/*.el-drawer__header h3 {*/
+/*  text-align: center;*/
+/*  margin: 0;*/
+/*}*/
 
 .el-drawer__footer {
   border-top: 1px solid #dfe1e6;
-  padding: 15px 20px 20px 20px;
+  padding: 20px 20px 20px 20px !important;
   width: calc(100% + 2 * var(--el-drawer-padding-primary, 20px));
   margin-left: calc(-1 * var(--el-drawer-padding-primary, 20px));
   margin-right: calc(-1 * var(--el-drawer-padding-primary, 20px));
-  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
 }
 /* 为el-drawer添加头部和底部分割线 */
 
