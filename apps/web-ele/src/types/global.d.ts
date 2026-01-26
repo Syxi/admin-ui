@@ -57,6 +57,17 @@ declare global {
     validCount: number;
     invalidCount: number;
   }
+
+  /**
+   * 分页响应对象(MyBatis Plus风格)
+   */
+  interface IPage<T> {
+    records: T[];
+    total: number;
+    size: number;
+    current: number;
+    pages?: number;
+  }
 }
 
 export {};

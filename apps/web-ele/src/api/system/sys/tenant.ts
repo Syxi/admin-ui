@@ -108,6 +108,26 @@ export async function updateTenantUsersApi(id: string, userIds: string[]) {
 }
 
 /**
+ * 为租户添加单个用户
+ * @param tenantId
+ * @param userId
+ * @returns
+ */
+export async function addUserToTenantApi(tenantId: string, userId: string) {
+  return requestClient.post(`/tenant/addUser/${tenantId}/${userId}`);
+}
+
+/**
+ * 从租户移除单个用户
+ * @param tenantId
+ * @param userId
+ * @returns
+ */
+export async function removeUserFromTenantApi(tenantId: string, userId: string) {
+  return requestClient.delete(`/tenant/removeUser/${tenantId}/${userId}`);
+}
+
+/**
  * 租户分配用用户, 穿梭框左侧数据
  * @returns
  * @param id
@@ -123,4 +143,39 @@ export async function userNotInTenantApi(id: string) {
  */
 export async function userInTenantApi(id: string) {
   return requestClient.get<TransferVO[]>(`/tenant/usersInTenant/${id}`);
+}
+
+/**
+ * 分页获取租户下所有用户
+ * @returns
+ * @param id
+ * @param pageNum
+ * @param pageSize
+ */
+export async function usersInTenantPageApi(id: string, pageNum: number = 1, pageSize: number = 10, keyword?: string) {
+  const params = new URLSearchParams();
+  params.append('pageNum', pageNum.toString());
+  params.append('pageSize', pageSize.toString());
+  if (keyword) {
+    params.append('keyword', keyword);
+  }
+  return requestClient.get<IPage<TransferVO>>(`/tenant/usersInTenant/page/${id}?${params.toString()}`);
+}
+
+/**
+ * 分页获取未分配租户的所有用户
+ * @returns
+ * @param id
+ * @param pageNum
+ * @param pageSize
+ * @param keyword
+ */
+export async function userNotInTenantPageApi(id: string, pageNum: number = 1, pageSize: number = 10, keyword?: string) {
+  const params = new URLSearchParams();
+  params.append('pageNum', pageNum.toString());
+  params.append('pageSize', pageSize.toString());
+  if (keyword) {
+    params.append('keyword', keyword);
+  }
+  return requestClient.get<IPage<TransferVO>>(`/tenant/userNotInTenant/page/${id}?${params.toString()}`);
 }
