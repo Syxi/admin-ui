@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ImagePage, ImageQuery } from '#/api/system/media/image';
+import type { ImagePage, ImageQuery } from '#/api/system/files/image';
 
 import { onMounted, reactive, ref } from 'vue';
 
@@ -9,10 +9,10 @@ import {
   deleteImagesApi,
   handleDownloadImageApi,
   selectImagePageApi,
-} from '#/api/system/media/image';
+} from '#/api/system/files/image';
 import { useCardHeight } from '#/hooks/useCardHeight';
-import ImageFormDialog from '#/views/system/media/image/ImageFormDialog.vue';
-import ImageUploadDialog from '#/views/system/media/image/ImageUploadDialog.vue';
+import ImageFormDialog from '#/views/system/files/image/ImageFormDialog.vue';
+import ImageUploadDialog from '#/views/system/files/image/ImageUploadDialog.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({

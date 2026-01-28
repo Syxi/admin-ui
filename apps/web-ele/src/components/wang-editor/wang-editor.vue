@@ -5,7 +5,7 @@ import { onBeforeUnmount, ref, shallowRef } from 'vue';
 import { useVModel } from '@vueuse/core';
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
 
-import { uploadImageApi } from '#/api/system/media/image';
+import { uploadImageApi } from '#/api/system/files/image';
 
 import '@wangeditor/editor/dist/css/style.css';
 

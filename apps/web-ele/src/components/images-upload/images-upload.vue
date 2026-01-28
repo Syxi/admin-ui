@@ -7,7 +7,7 @@ import { ref } from 'vue';
 import { useVModel } from '@vueuse/core';
 import { ElMessage } from 'element-plus';
 
-import { uploadImagesApi } from '#/api/system/media/image';
+import { uploadImagesApi } from '#/api/system/files/image';
 
 const props = defineProps({
   modelValue: {

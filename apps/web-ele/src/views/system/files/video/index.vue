@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { VideoQuery, VideoVO } from '#/api/system/media/video';
+import type { VideoQuery, VideoVO } from '#/api/system/files/video';
 
 import { onMounted, reactive, ref } from 'vue';
 
@@ -9,10 +9,10 @@ import {
   deleteVideoApi,
   downloadVideoApi,
   selectVideosPageApi,
-} from '#/api/system/media/video';
+} from '#/api/system/files/video';
 import { useCardHeight } from '#/hooks/useCardHeight';
-import VideoPlayerDialog from '#/views/system/media/video/VideoPlayerDialog.vue';
-import VideoUploadDialog from '#/views/system/media/video/VideoUploadDialog.vue';
+import VideoPlayerDialog from '#/views/system/files/video/VideoPlayerDialog.vue';
+import VideoUploadDialog from '#/views/system/files/video/VideoUploadDialog.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
 
 // import 'video.js/dist/video-js.css';

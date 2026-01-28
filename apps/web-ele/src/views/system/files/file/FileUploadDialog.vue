@@ -5,7 +5,7 @@ import { nextTick, reactive, ref } from 'vue';
 
 import { ElMessage } from 'element-plus';
 
-import { fileUploadApi } from '#/api/system/media/file';
+import { fileUploadApi } from '#/api/system/files/file';
 
 const emit = defineEmits<{ (e: 'success'): void }>();
 

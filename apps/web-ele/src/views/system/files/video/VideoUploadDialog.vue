@@ -5,17 +5,34 @@ import { nextTick, reactive, ref } from 'vue';
 
 import { ElMessage } from 'element-plus';
 
-import { uploadImageApi } from '#/api/system/media/image';
+import { uploadVideoApi } from '#/api/system/files/video';
 
 const emit = defineEmits<{ (e: 'success'): void }>();
-
 const uploadRef = ref<UploadInstance>();
 
-// 数组形式存储用户上传的多图片
+// 数组形式存储用户上传的多文件
 let uploadFiles = reactive<UploadUserFile[]>([]);
 
+const dialog = reactive({
+  title: '上传视频',
+  visible: false,
+});
+
+// 打开上传视频窗口
+function openDialog() {
+  dialog.visible = true;
+}
+
+// 关闭上传视频窗口
+function closeDialog() {
+  // 清空已上传的文件引用
+  uploadFiles = [];
+  uploadRef.value?.clearFiles();
+  dialog.visible = false;
+}
+
 function handleFileExceed(files: any[]) {
-  const excessFiles = files.slice(1); // 仅保留超出的图片
+  const excessFiles = files.slice(1); // 仅保留超出的文件
   excessFiles.forEach((file) => {
     uploadFiles.push({
       uid: file.uid,
@@ -32,78 +49,66 @@ function handleFileChange(file: any) {
   });
 }
 
-// 删除上传列表的图片
+// 只接受视频文件
+function beforeUpload(uploadFile: UploadUserFile) {
+  // 修改为检查视频格式
+  const isVideo = [
+    'video/mp4',
+    'video/mpeg',
+    'video/quicktime',
+    'video/webm',
+    'video/x-flv',
+    'video/x-m4v',
+    'video/x-matroska',
+    'video/x-msvideo', // AVI 视频
+  ].includes(uploadFile.type);
+
+  if (!isVideo) {
+    ElMessage.error('上传文件只能是视频格式!'); // 提示信息已更正
+    return false;
+  }
+
+  return isVideo;
+}
+
+// 删除上传列表的文件
 async function handleRemove(uploadFile: UploadUserFile) {
-  // 比较图片uid。上传图片的uid和删除图片的uid是否一样
+  // 比较文件uid。上传文件的uid和删除文件的uid是否一样
   const index = uploadFiles.findIndex(
     (file) => file.raw.uid === uploadFile.uid,
   );
 
+
   // uid相同就可以删除
   if (index === -1) {
-    ElMessage.error('图片未找到，无法删除');
+    ElMessage.error('文件未找到，无法删除');
   } else {
-    // 从上传列表图片中移除图片
+    // 从上传列表文件中移除文件
     uploadFiles.splice(index, 1);
     // 等待DOM更新后再显示信息
     await nextTick();
-    ElMessage.success('图片已从上传列表移除');
+    ElMessage.success('文件已从上传列表移除');
   }
 }
 
-// 只接受图片文件
-function beforeUpload(uploadFile: UploadUserFile) {
-  const isImage = [
-    'image/gif',
-    'image/jpeg',
-    'image/jpg',
-    'image/png',
-  ].includes(uploadFile.type);
-  if (!isImage) {
-    ElMessage.error('上传文件只能是图片格式!');
-    return false;
-  }
-
-  return isImage;
-}
-
-const dialog = reactive({
-  title: '上传图片',
-  visible: false,
-});
-
-// 打开上传图片窗口
-function openUploadDialog() {
-  dialog.visible = true;
-}
-
-// 关闭上传图片窗口
-function closeDialog() {
-  // 清空已上传的图片引用
-  uploadFiles = [];
-  uploadRef.value?.clearFiles();
-  dialog.visible = false;
-}
-
-// 上传图片
+// 上传文件
 const submitUpload = () => {
   if (uploadFiles.length === 0) {
-    ElMessage.error('上传图片不能为空');
+    ElMessage.error('上传文件不能为空');
     return false;
   }
   Promise.all(
     uploadFiles.map((uploadFile) => {
-      return uploadImageApi(uploadFile.raw);
+      return uploadVideoApi(uploadFile.raw);
     }),
   ).then(() => {
-    ElMessage.success('图片上传成功');
+    ElMessage.success('视频上传成功');
     emit('success');
-    // 清空已上传的图片引用
     closeDialog();
   });
 };
 
-defineExpose({ openUploadDialog });
+defineExpose({ openDialog });
 </script>
 <template>
   <el-dialog
@@ -121,8 +126,8 @@ defineExpose({ openUploadDialog });
       :on-exceed="handleFileExceed"
       :on-change="handleFileChange"
       :on-remove="handleRemove"
-      :before-upload="beforeUpload"
-      accept=".jpg,.jpeg,.png,.gif"
+      :on-before="beforeUpload"
+      accept=".mp4,.m4v,.mkv,.webm,.mov,.avi,.flv,.mpeg"
       :auto-upload="false"
       :multiple="true"
     >

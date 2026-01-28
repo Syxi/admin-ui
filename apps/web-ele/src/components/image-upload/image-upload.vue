@@ -5,7 +5,7 @@ import type { UploadRawFile, UploadRequestOptions } from 'element-plus';
 import { useVModel } from '@vueuse/core';
 import { ElMessage } from 'element-plus';
 
-import { uploadImageApi } from '#/api/system/media/image';
+import { uploadImageApi } from '#/api/system/files/image';
 
 const props = defineProps({
   modelValue: {

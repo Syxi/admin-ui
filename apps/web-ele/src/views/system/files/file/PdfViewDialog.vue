@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FileRecordVO } from '#/api/system/media/file';
+import type { FileRecordVO } from '#/api/system/files/file';
 
 import { reactive, ref } from 'vue';
 

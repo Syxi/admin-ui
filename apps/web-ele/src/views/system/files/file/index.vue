@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FileRecordQuery, FileRecordVO } from '#/api/system/media/file';
+import type { FileRecordQuery, FileRecordVO } from '#/api/system/files/file';
 
 import { onMounted, reactive, ref } from 'vue';
 
@@ -10,10 +10,10 @@ import {
   handleDownloadPdfFileApi,
   handleDownloadSourceFileApi,
   selectFilePageApi,
-} from '#/api/system/media/file';
+} from '#/api/system/files/file';
 import { useCardHeight } from '#/hooks/useCardHeight';
-import FileUploadDialog from '#/views/system/media/file/FileUploadDialog.vue';
-import PdfViewDialog from '#/views/system/media/file/PdfViewDialog.vue';
+import FileUploadDialog from '#/views/system/files/file/FileUploadDialog.vue';
+import PdfViewDialog from '#/views/system/files/file/PdfViewDialog.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({

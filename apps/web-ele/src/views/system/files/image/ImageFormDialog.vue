@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { ImageForm } from '#/api/system/media/image';
+import type { ImageForm } from '#/api/system/files/image';
 
 import { reactive, ref } from 'vue';
 
 import { ElForm, ElMessage } from 'element-plus';
 
-import { getImageDetailsApi, updateImageApi } from '#/api/system/media/image';
+import { getImageDetailsApi, updateImageApi } from '#/api/system/files/image';
 
 const imageFormRef = ref(ElForm);
 
