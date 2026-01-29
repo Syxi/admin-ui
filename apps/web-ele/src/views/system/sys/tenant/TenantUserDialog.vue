@@ -1,307 +1,164 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, reactive, computed } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
-import { ElMessage } from 'element-plus';
+import {
+  userNotInTenantPageApi,
+  usersInTenantPageApi,
+  updateTenantUsersApi
+} from '#/api/system/sys/tenant';
 
-import { updateTenantUsersApi, usersInTenantPageApi, userNotInTenantPageApi, addUserToTenantApi, removeUserFromTenantApi } from '#/api/system/sys/tenant';
+interface TransferItem {
+  key: string;
+  label: string;
+  realName?: string;
+  disabled?: boolean;
+}
 
-// 定义事件
-const emit = defineEmits<{
-  (e: 'success'): void;
-}>();
+type TransferKey = string | number;
+type TransferDirection = 'left' | 'right';
 
-const visible = ref(false);
 
+const emit = defineEmits(['success']);
+
+const dialogVisible = ref(false);
+const submitLoading = ref(false);
 const tenantId = ref('');
-
 const tenantName = ref('');
+const transferKey = ref(0); // 用于强制刷新穿梭框
 
-// 左侧表格数据（不属于租户的用户）
-const leftTableData = ref<TransferVO[]>([]);
-const leftLoading = ref(false);
-const leftTotal = ref(0);
-const leftCurrentPage = ref(1);
-const leftPageSize = ref(10);
-// 左侧搜索关键词
-const leftSearchKeyword = ref('');
 
-// 右侧表格数据（属于租户的用户）
-const rightTableData = ref<TransferVO[]>([]);
-const rightLoading = ref(false);
-const rightTotal = ref(0);
-const rightCurrentPage = ref(1);
-const rightPageSize = ref(10);
-// 右侧搜索关键词
-const rightSearchKeyword = ref('');
+const allUsers = ref<TransferItem[]>([]);
+const selectedKeys = ref<string[]>([]);
 
-/**
- * 打开分配用户弹窗
- */
-async function openUserDialog(id: string, name: string) {
-  visible.value = true;
-  tenantName.value = name;
+
+// 打开对话框
+function openUserDialog(id: string, name: string) {
   tenantId.value = id;
+  tenantName.value = name;
+  transferKey.value++; // 更新key以强制刷新穿梭框
+  dialogVisible.value = true;
+  handleQuery();
+}
+
+// 关闭对话框
+function closeDialog() {
+  dialogVisible.value = false;
+  allUsers.value = [];
+  selectedKeys.value = [];
+  tenantId.value = '';
+  tenantName.value = '';
   
-  // 重置分页和搜索关键词
-  leftCurrentPage.value = 1;
-  leftSearchKeyword.value = '';
-  rightCurrentPage.value = 1;
-  rightSearchKeyword.value = '';
-  
-  // 加载数据
-  await loadLeftTableData();
-  await loadRightTableData();
+  // 无需手动清空搜索条件，因为组件会在下次打开时重新创建
 }
 
-/**
- * 加载左侧表格数据（不属于租户的用户）
- */
-async function loadLeftTableData() {
-  leftLoading.value = true;
+// 查询数据
+async function handleQuery() {
   try {
-    const response = await userNotInTenantPageApi(
-      tenantId.value, 
-      leftCurrentPage.value, 
-      leftPageSize.value,
-      leftSearchKeyword.value  // 添加搜索关键词参数
-    );
-    leftTableData.value = response.records;
-    leftTotal.value = response.total;
-  } finally {
-    leftLoading.value = false;
-  }
-}
+    // 获取已分配的用户
+    const usersInTenant = await usersInTenantPageApi(tenantId.value, 1, 1000);
 
-/**
- * 加载右侧表格数据（属于租户的用户）
- */
-async function loadRightTableData() {
-  rightLoading.value = true;
-  try {
-    const response = await usersInTenantPageApi(
-      tenantId.value, 
-      rightCurrentPage.value, 
-      rightPageSize.value,
-      rightSearchKeyword.value  // 添加搜索关键词参数
-    );
-    rightTableData.value = response.records;
-    rightTotal.value = response.total;
-  } finally {
-    rightLoading.value = false;
-  }
-}
+    // 获取未分配的用户
+    const userNotInTenant = await userNotInTenantPageApi(tenantId.value, 1, 1000);
 
-/**
- * 左侧表格分页变化
- */
-function handleLeftPaginationChange(page: number) {
-  leftCurrentPage.value = page;
-  loadLeftTableData();
-}
+    const assigned = usersInTenant.list;
+    const unassigned = userNotInTenant.list;
 
-/**
- * 左侧表格每页数量变化
- */
-function handleLeftSizeChange(size: number) {
-  leftPageSize.value = size;
-  leftCurrentPage.value = 1;
-  loadLeftTableData();
-}
+    // 合并所有用户（确保 key 唯一）
+    allUsers.value = [...assigned, ...unassigned];
 
-/**
- * 右侧表格分页变化
- */
-function handleRightPaginationChange(page: number) {
-  rightCurrentPage.value = page;
-  loadRightTableData();
-}
+    // 提取已分配用户的 key 作为选中项
+    selectedKeys.value = assigned.map(item => item.key);
 
-/**
- * 右侧表格每页数量变化
- */
-function handleRightSizeChange(size: number) {
-  rightPageSize.value = size;
-  rightCurrentPage.value = 1;
-  loadRightTableData();
-}
-
-/**
- * 左侧搜索
- */
-function handleLeftSearch() {
-  leftCurrentPage.value = 1;  // 重置到第一页
-  loadLeftTableData();
-}
-
-/**
- * 右侧搜索
- */
-function handleRightSearch() {
-  rightCurrentPage.value = 1;  // 重置到第一页
-  loadRightTableData();
-}
-
-/**
- * 添加单个用户到租户
- */
-async function handleAddSingleUser(row: TransferVO) {
-  try {
-    // 使用新的API直接添加单个用户
-    const result = await addUserToTenantApi(tenantId.value, row.key.toString());
-    
-    if (result) {
-      ElMessage.success('添加用户成功');
-      
-      // 重新加载数据 - 重要：确保添加用户后立即更新显示
-      // 使用Promise.all同时更新两个表格的数据，提高效率
-      await Promise.all([
-        loadLeftTableData(),   // 左侧数据应该更新（该用户不再属于"非此租户"）
-        loadRightTableData()   // 右侧数据应该更新（该用户现在属于"此租户"）
-      ]);
-    }
   } catch (error) {
-    console.error('添加用户失败:', error);
-    ElMessage.error('添加用户失败');
+    console.error('获取用户数据失败:', error);
+    ElMessage.error('获取用户数据失败');
   }
 }
 
-/**
- * 从租户移除单个用户
- */
-async function handleRemoveSingleUser(row: TransferVO) {
+// 监听穿梭框变化
+const handleChange = (
+  value: TransferKey[],
+  direction: TransferDirection,
+  movedKeys: TransferKey[]
+) => {
+  console.log(value, direction, movedKeys)
+}
+
+// 确认保存
+async function confirmSave() {
   try {
-    // 直接移除用户，不需要确认
-    const result = await removeUserFromTenantApi(tenantId.value, row.key.toString());
-    
-    if (result) {
-      ElMessage.success('移除用户成功');
-      
-      // 重新加载数据 - 重要：确保移除用户后立即更新显示
-      // 使用Promise.all同时更新两个表格的数据，提高效率
-      await Promise.all([
-        loadLeftTableData(),   // 左侧数据应该更新（该用户现在属于"非此租户"）
-        loadRightTableData()   // 右侧数据应该更新（该用户不再属于"此租户"）
-      ]);
-    }
+    // 调用API更新租户用户关系
+    await updateTenantUsersApi(tenantId.value, selectedKeys.value);
+
+    ElMessage.success('分配用户成功');
+    emit('success');
+    closeDialog();
   } catch (error) {
-    console.error('移除用户失败:', error);
-    ElMessage.error('移除用户失败');
+    console.error('分配用户失败:', error);
+    ElMessage.error('分配用户失败');
   }
 }
 
-defineExpose({ openUserDialog });
+defineExpose({
+  openUserDialog
+});
 </script>
+
+<style scoped>
+/* 穿梭框宽度和高度调整 */
+.el-transfer {
+  --el-transfer-panel-width: 300px;
+  --el-transfer-border-color: var(--el-border-color-lighter);
+  --el-transfer-border-radius: var(--el-border-radius-base);
+  /* stylelint-disable-next-line declaration-block-no-duplicate-custom-properties */
+  --el-transfer-panel-width: 300px;
+  --el-transfer-panel-header-height: 40px;
+  --el-transfer-panel-header-bg-color: var(--el-fill-color-light);
+  --el-transfer-panel-footer-height: 60px;
+  --el-transfer-panel-body-height: 550px;
+  --el-transfer-item-height: 30px;
+  --el-transfer-filter-height: 32px;
+}
+</style>
 
 <template>
   <el-dialog
-    draggable
-    v-model="visible"
+    v-model="dialogVisible"
     :title="`${tenantName} - 分配用户`"
-    width="80%"
-    top="5vh"
+    @close="closeDialog"
     center
+    draggable
   >
-    <div style="display: flex; gap: 20px;">
-      <!-- 左侧表格 - 不属于租户的用户 -->
-      <div style="flex: 1;">
-        <div style="display: flex; margin-bottom: 10px; gap: 10px; align-items: center;">
-          <h4>不属于该租户的用户</h4>
-          <el-input
-            v-model="leftSearchKeyword"
-            placeholder="搜索用户名/真实姓名"
-            style="width: 200px;"
-            @keyup.enter="handleLeftSearch"
-            clearable
-          />
-          <el-button type="primary" @click="handleLeftSearch">搜索</el-button>
-        </div>
-        
-        <el-table
-          v-loading="leftLoading"
-          :data="leftTableData"
-          height="400px"
-          border
-        >
-          <el-table-column prop="label" label="用户名" show-overflow-tooltip />
-          <el-table-column prop="realName" label="真实姓名" show-overflow-tooltip />
-          <el-table-column label="操作" width="100" fixed="right">
-            <template #default="{ row }">
-              <el-button type="primary" size="small" @click="handleAddSingleUser(row)">
-                添加
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        
-        <el-pagination
-          v-if="leftTotal > 0"
-          v-model:current-page="leftCurrentPage"
-          v-model:page-size="leftPageSize"
-          :total="leftTotal"
-          :page-sizes="[10, 20, 30, 50]"
-          layout="total, sizes, prev, pager, next, jumper"
-          style="margin-top: 10px;"
-          @size-change="handleLeftSizeChange"
-          @current-change="handleLeftPaginationChange"
-        />
-      </div>
-
-      <!-- 右侧表格 - 属于租户的用户 -->
-      <div style="flex: 1;">
-        <div style="display: flex; margin-bottom: 10px; gap: 10px; align-items: center;">
-          <h4>属于该租户的用户</h4>
-          <el-input
-            v-model="rightSearchKeyword"
-            placeholder="搜索用户名/真实姓名"
-            style="width: 200px;"
-            @keyup.enter="handleRightSearch"
-            clearable
-          />
-          <el-button type="primary" @click="handleRightSearch">搜索</el-button>
-        </div>
-        
-        <el-table
-          v-loading="rightLoading"
-          :data="rightTableData"
-          height="400px"
-          border
-        >
-          <el-table-column prop="label" label="用户名" show-overflow-tooltip />
-          <el-table-column prop="realName" label="真实姓名" show-overflow-tooltip />
-          <el-table-column label="操作" width="100" fixed="right">
-            <template #default="{ row }">
-              <el-button type="danger" size="small" @click="handleRemoveSingleUser(row)">
-                移除
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        
-        <el-pagination
-          v-if="rightTotal > 0"
-          v-model:current-page="rightCurrentPage"
-          v-model:page-size="rightPageSize"
-          :total="rightTotal"
-          :page-sizes="[10, 20, 30, 50]"
-          layout="total, sizes, prev, pager, next, jumper"
-          style="margin-top: 10px;"
-          @size-change="handleRightSizeChange"
-          @current-change="handleRightPaginationChange"
-        />
-      </div>
+    <!-- 穿梭框 -->
+    <div style="display: flex; height: 600px">
+      <el-transfer
+        :key="transferKey"
+        v-model="selectedKeys"
+        :data="allUsers"
+        :titles="['未分配用户', '已分配用户']"
+        :button-texts="['移除', '添加']"
+        filterable
+        filter-placeholder="请输入用户名"
+        :props="{
+            key: 'key',
+            label: 'label',
+            disabled: 'disabled'
+          }"
+        @change="handleChange"
+      >
+<!--        <template #default="{ option }">-->
+<!--          <span>{{ option.label }}</span>-->
+<!--          <span style="color: #8492a6; font-size: 13px; margin-left: 10px">{{ option.realName }}</span>-->
+<!--        </template>-->
+      </el-transfer>
     </div>
 
     <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="visible = false">关闭</el-button>
+      <div >
+        <el-button @click="closeDialog">取 消</el-button>
+        <el-button type="primary" @click="confirmSave">确 定</el-button>
       </div>
     </template>
   </el-dialog>
 </template>
-
-<style scoped>
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-}
-</style>

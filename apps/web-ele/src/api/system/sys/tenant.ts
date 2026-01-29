@@ -107,43 +107,6 @@ export async function updateTenantUsersApi(id: string, userIds: string[]) {
   return requestClient.put(`/tenant/addUser/${id}`, userIds);
 }
 
-/**
- * 为租户添加单个用户
- * @param tenantId
- * @param userId
- * @returns
- */
-export async function addUserToTenantApi(tenantId: string, userId: string) {
-  return requestClient.post(`/tenant/addUser/${tenantId}/${userId}`);
-}
-
-/**
- * 从租户移除单个用户
- * @param tenantId
- * @param userId
- * @returns
- */
-export async function removeUserFromTenantApi(tenantId: string, userId: string) {
-  return requestClient.delete(`/tenant/removeUser/${tenantId}/${userId}`);
-}
-
-/**
- * 租户分配用用户, 穿梭框左侧数据
- * @returns
- * @param id
- */
-export async function userNotInTenantApi(id: string) {
-  return requestClient.get<TransferVO[]>(`/tenant/userNotInTenant/${id}`);
-}
-
-/**
- * 租户分配用用户， 穿梭框右侧数据  (穿梭框右侧数据必须是左侧数据的子集)
- * @returns
- * @param id
- */
-export async function userInTenantApi(id: string) {
-  return requestClient.get<TransferVO[]>(`/tenant/usersInTenant/${id}`);
-}
 
 /**
  * 分页获取租户下所有用户
@@ -159,7 +122,7 @@ export async function usersInTenantPageApi(id: string, pageNum: number = 1, page
   if (keyword) {
     params.append('keyword', keyword);
   }
-  return requestClient.get<IPage<TransferVO>>(`/tenant/usersInTenant/page/${id}?${params.toString()}`);
+  return requestClient.get<IPage<TransferVO>>(`/tenant/userInTenant/page/${id}?${params.toString()}`);
 }
 
 /**
