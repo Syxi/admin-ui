@@ -8,11 +8,15 @@ import { ElForm, ElMessage, ElMessageBox } from 'element-plus';
 import {
   deleteFileApi,
   handleDownloadPdfFileApi,
+  handleDownloadPdfFileWithResumeApi,
   handleDownloadSourceFileApi,
+  handleDownloadSourceFileWithResumeApi,
   selectFilePageApi,
 } from '#/api/system/files/file';
+import { useAccessStore } from '@vben/stores';
 import { useCardHeight } from '#/hooks/useCardHeight';
 import FileUploadDialog from '#/views/system/files/file/FileUploadDialog.vue';
+import ChunkUploadDialog from '#/views/system/files/file/ChunkUploadDialog.vue';
 import PdfViewDialog from '#/views/system/files/file/PdfViewDialog.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
 
@@ -44,6 +48,11 @@ const fileIds = ref<string[]>([]);
 const fileUploadDialogRef = ref();
 function openUploadFileDialog() {
   fileUploadDialogRef.value.openDialog();
+}
+
+const chunkUploadDialogRef = ref();
+function openChunkUploadDialog() {
+  chunkUploadDialogRef.value.openDialog();
 }
 
 /**
@@ -108,20 +117,32 @@ function handleDeleteFile(id?: string) {
  */
 async function handleDownloadFile(row: FileRecordVO) {
   try {
-    const id = row.id;
-    const response = await handleDownloadSourceFileApi(id);
+    // 使用断点续传下载
+    const downloadUrl = await handleDownloadSourceFileWithResumeApi(row.id);
+    const fullUrl = `${import.meta.env.VITE_GLOB_API_URL}${downloadUrl}`;
 
-    // 处理下载逻辑
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const fileName = row.fileName;
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-
-    link.click();
-    window.URL.revokeObjectURL(url);
-  } catch {
+    // 使用增强下载器
+    const { downloadWithResume } = await import('#/utils/enhanced-file-downloader');
+    const accessStore = useAccessStore();
+    const token = accessStore.accessToken;
+    
+    await downloadWithResume(fullUrl, row.fileName, {
+      onProgress: (progress) => {
+        console.log(`下载进度: ${progress}%`);
+      },
+      onSpeed: (speed) => {
+        console.log(`下载速度: ${speed}`);
+      },
+      onComplete: () => {
+        ElMessage.success(`${row.fileName} 下载完成`);
+      },
+      onError: (error) => {
+        ElMessage.error(`文件下载失败: ${error.message}`);
+      },
+      token: token  // 传递认证令牌
+    });
+  } catch (error) {
+    console.error('文件下载失败:', error);
     ElMessage.error('文件下载失败，请稍后再试!');
   }
 }
@@ -236,7 +257,7 @@ const { tableHeight } = useTableHeight(queryForm);
           <el-button
             type="primary"
             v-access:code="['sys:file:upload']"
-            @click="openUploadFileDialog()"
+            @click="openChunkUploadDialog()"
           >
             <el-icon> <Upload /> </el-icon>上传文件
           </el-button>
@@ -325,7 +346,8 @@ const { tableHeight } = useTableHeight(queryForm);
       />
 
     <!--上传文件弹窗-->
-    <FileUploadDialog ref="fileUploadDialogRef" @success="resetQuery" />
+<!--    <FileUploadDialog ref="fileUploadDialogRef" @success="resetQuery" />-->
+    <ChunkUploadDialog ref="chunkUploadDialogRef" @success="resetQuery" />
 
     <!-- 使用dialog查看pdf -->
     <PdfViewDialog ref="previewFileDialogRef" />

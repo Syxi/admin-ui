@@ -23,7 +23,12 @@ export default defineConfig(async () => {
             // mock代理目标地址
             target: 'http://localhost:8888',
             ws: true,
-          },
+          }
+          // '/file': {
+          //   changeOrigin: true,
+          //   target: 'http://localhost:8888',
+          //   ws: true,
+          // },
         },
       },
     },
