@@ -227,6 +227,11 @@ async function uploadFileWithChunks(file: File, uid: string) {
 
     // 合并分片
     try {
+      // 更新状态为合并中
+      status.status = 'uploading';
+      status.progress = 99; // 设置接近完成但仍显示进行中
+      ElMessage.info(`${file.name} 分片上传完成，正在合并文件...`);
+      
       await mergeChunksApi({
         identifier: fileMd5,
         filename: file.name,
@@ -236,7 +241,7 @@ async function uploadFileWithChunks(file: File, uid: string) {
 
       status.status = 'success';
       status.progress = 100;
-      ElMessage.success(`${file.name} 上传成功`);
+      ElMessage.success(`${file.name} 上传合并成功`);
     } catch (error) {
       status.status = 'error';
       ElMessage.error(`${file.name} 合并失败: ${error}`);
