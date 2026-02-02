@@ -28,6 +28,13 @@ defineOptions({
 // 加载状态
 const loading = ref(false);
 
+// 下载进度相关
+const downloadProgress = ref(0); // 当前下载进度
+const downloadSpeed = ref(''); // 下载速度
+const downloadedInfo = ref(''); // 已下载的信息
+const downloadDialogVisible = ref(false); // 下载进度弹窗可见性
+const currentDownloadingFile = ref(''); // 当前下载的文件名
+
 // 分页总记录数
 const total = ref(0);
 
@@ -125,25 +132,58 @@ async function handleDownloadFile(row: FileRecordVO) {
     const { downloadWithResume } = await import('#/utils/enhanced-file-downloader');
     const accessStore = useAccessStore();
     const token = accessStore.accessToken;
-    
+
+    // 设置下载信息并打开弹窗
+    downloadProgress.value = 0;
+    downloadSpeed.value = '';
+    downloadedInfo.value = '0.00 MB / 0.00 MB';
+    currentDownloadingFile.value = row.fileName;
+    downloadDialogVisible.value = true;
+
     await downloadWithResume(fullUrl, row.fileName, {
-      onProgress: (progress) => {
-        console.log(`下载进度: ${progress}%`);
+      onProgress: (progress, downloaded, total) => {
+        downloadProgress.value = progress; // 更新下载进度
+        // 更新已下载信息
+        const downloadedMB = (downloaded / (1024 * 1024)).toFixed(2);
+        const totalMB = (total / (1024 * 1024)).toFixed(2);
+        downloadedInfo.value = `${downloadedMB} MB / ${totalMB} MB`;
       },
       onSpeed: (speed) => {
-        console.log(`下载速度: ${speed}`);
+        downloadSpeed.value = speed; // 更新下载速度
       },
       onComplete: () => {
         ElMessage.success(`${row.fileName} 下载完成`);
+        downloadProgress.value = 100; // 下载完成，进度设为100%
+        // 延迟关闭弹窗，让用户看到完成状态
+        setTimeout(() => {
+          downloadDialogVisible.value = false;
+          downloadProgress.value = 0;
+          downloadSpeed.value = '';
+          downloadedInfo.value = '';
+          currentDownloadingFile.value = '';
+        }, 1000);
       },
       onError: (error) => {
         ElMessage.error(`文件下载失败: ${error.message}`);
+        // 延迟关闭弹窗
+        setTimeout(() => {
+          downloadDialogVisible.value = false;
+          downloadProgress.value = 0;
+          downloadSpeed.value = '';
+          downloadedInfo.value = '';
+          currentDownloadingFile.value = '';
+        }, 1000);
       },
       token: token  // 传递认证令牌
     });
   } catch (error) {
     console.error('文件下载失败:', error);
     ElMessage.error('文件下载失败，请稍后再试!');
+    downloadDialogVisible.value = false;
+    downloadProgress.value = 0;
+    downloadSpeed.value = '';
+    downloadedInfo.value = '';
+    currentDownloadingFile.value = '';
   }
 }
 
@@ -226,6 +266,8 @@ const { tableHeight } = useTableHeight(queryForm);
             @keyup.enter="handleQuery()"
           />
         </el-form-item>
+
+
 
         <el-form-item>
           <el-button type="primary" @click="handleQuery()">
@@ -349,7 +391,38 @@ const { tableHeight } = useTableHeight(queryForm);
 <!--    <FileUploadDialog ref="fileUploadDialogRef" @success="resetQuery" />-->
     <ChunkUploadDialog ref="chunkUploadDialogRef" @success="resetQuery" />
 
-    <!-- 使用dialog查看pdf -->
+        <!-- 使用dialog查看pdf -->
     <PdfViewDialog ref="previewFileDialogRef" />
+
+    <!-- 下载进度弹窗 -->
+    <el-dialog
+      v-model="downloadDialogVisible"
+      title="文件下载进度"
+      width="500px"
+      :show-close="false"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      center
+    >
+      <div>
+        <p>正在下载: {{ currentDownloadingFile }}</p>
+        <el-progress
+          :percentage="downloadProgress"
+          :format="(percentage) => `${percentage}%`"
+          :stroke-width="20"
+          status="success"
+          style="margin: 20px 0;"
+        />
+        <div style="display: flex; justify-content: space-between; font-size: 14px;">
+          <span>已下载: {{ downloadedInfo }}</span>
+          <span>速度: {{ downloadSpeed }}</span>
+        </div>
+      </div>
+      <template #footer>
+        <div style="text-align: right; padding-right: 20px;">
+          <el-button type="primary" :disabled="downloadProgress < 100 && downloadProgress > 0">完成</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
