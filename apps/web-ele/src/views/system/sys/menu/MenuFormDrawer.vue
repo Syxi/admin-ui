@@ -142,6 +142,7 @@ onMounted(() => {
     destroy-on-close
     @close="closeDialog"
     resizable
+    :z-index="100"
   >
       <ElForm
         ref="menuFormRef"
