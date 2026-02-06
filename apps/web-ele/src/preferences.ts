@@ -19,7 +19,7 @@ export const overridesPreferences = defineOverridesPreferences({
     source: '/static/img/codesee-icon.svg',
   },
   copyright: {
-    companyName: '未来科技',
+    companyName: '同略科技',
     companySiteLink: 'https://www.vben.pro',
     date: '2025',
     enable: false,
