@@ -34,8 +34,8 @@ class RequestClient {
         'Content-Type': 'application/json;charset=utf-8',
       },
       responseReturn: 'raw',
-      // 默认超时时间
-      timeout: 60_000,
+      // 默认超时时间（增加到10分钟以支持大文件上传）
+      timeout: 600_000,
     };
     const { ...axiosConfig } = options;
     const requestConfig = merge(axiosConfig, defaultConfig);
