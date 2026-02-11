@@ -60,36 +60,6 @@ export async function fileUploadApi(file: File) {
   });
 }
 
-/**
- * 下载文件
- * @returns
- * @param id
- */
-export async function handleDownloadSourceFileApi(id: string) {
-  return requestClient.get(`/file/downloadSourceFile/${id}`, {
-    responseType: 'blob',
-  });
-}
-
-/**
- * 下载文件支持断点续传
- * @param id
- * @returns
- */
-export async function handleDownloadSourceFileWithResumeApi(id: string) {
-  // 返回下载地址，由下载器处理断点续传
-  return `/file/downloadSourceFile/${id}`;
-}
-
-/**
- * 下载PDF文件支持断点续传
- * @param id
- * @returns
- */
-export async function handleDownloadPdfFileWithResumeApi(id: string) {
-  // 返回下载地址，由下载器处理断点续传
-  return `/file/downloadPdfFile/${id}`;
-}
 
 /**
  * 检查文件是否存在
@@ -151,10 +121,12 @@ export async function getUploadedChunksApi(identifier: string) {
   return requestClient.get(`/file/uploadedChunks`, { params });
 }
 
+
+
 /**
- * 下载pdf文件
- * @param id
- * @returns
+ * 下载PDF文件
+ * @param id 文件ID
+ * @returns PDF文件Blob
  */
 export async function handleDownloadPdfFileApi(id: string) {
   return requestClient.get(`/file/downloadPdfFile/${id}`, {
