@@ -64,6 +64,15 @@ async function handleRemove(uploadFile: UploadUserFile) {
 // 分片大小，默认10MB
 const CHUNK_SIZE = 10 * 1024 * 1024;
 
+// 上传并发控制配置
+const UPLOAD_CONFIG = {
+  CHUNK_CONCURRENCY: 3,      // 分片并发上传数
+  FILE_CONCURRENCY: 3,       // 文件并发上传数
+  RETRY_ATTEMPTS: 3,         // 重试次数
+  RETRY_DELAY_BASE: 1000,    // 重试基础延迟(ms)
+  PROGRESS_UPDATE_INTERVAL: 100 // 进度更新间隔(ms)
+};
+
 // 文件处理状态
 interface FileStatus {
   uid: string;
@@ -137,8 +146,48 @@ async function checkChunkExists(identifier: string, chunkNumber: number): Promis
   }
 }
 
-// 上传单个分片
-async function uploadSingleChunk(identifier: string, chunk: Blob, chunkNumber: number, totalChunks: number, totalSize: number, filename: string, chunkHash: string) {
+// 上传队列管理器
+class UploadQueue {
+  private activeUploads: number = 0;
+  private maxConcurrent: number = UPLOAD_CONFIG.CHUNK_CONCURRENCY;
+  private queue: Array<() => Promise<any>> = [];
+
+  async add<T>(task: () => Promise<T>): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      this.queue.push(async () => {
+        try {
+          const result = await task();
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
+      });
+      this.processQueue();
+    });
+  }
+
+  private async processQueue(): Promise<void> {
+    if (this.activeUploads >= this.maxConcurrent || this.queue.length === 0) {
+      return;
+    }
+
+    this.activeUploads++;
+    const task = this.queue.shift()!;
+    
+    try {
+      await task();
+    } finally {
+      this.activeUploads--;
+      this.processQueue();
+    }
+  }
+}
+
+// 全局上传队列实例
+const uploadQueue = new UploadQueue();
+
+// 上传单个分片（带重试和队列控制）
+async function uploadSingleChunk(identifier: string, chunk: Blob, chunkNumber: number, totalChunks: number, totalSize: number, filename: string, chunkHash: string, retryCount: number = 0): Promise<any> {
   const formData = new FormData();
   formData.append('identifier', identifier);
   formData.append('chunkNumber', chunkNumber);
@@ -149,15 +198,24 @@ async function uploadSingleChunk(identifier: string, chunk: Blob, chunkNumber: n
   formData.append('file', chunk);
 
   try {
-    const response = await uploadChunkApi(formData);
+    // 使用队列控制并发
+    const response = await uploadQueue.add(() => uploadChunkApi(formData));
     return response;
   } catch (error) {
-    console.error(`上传分片 ${chunkNumber} 失败:`, error);
+    console.error(`上传分片 ${chunkNumber} 失败 (尝试 ${retryCount + 1}/${UPLOAD_CONFIG.RETRY_ATTEMPTS}):`, error);
+    
+    // 重试逻辑
+    if (retryCount < UPLOAD_CONFIG.RETRY_ATTEMPTS - 1) {
+      const delay = UPLOAD_CONFIG.RETRY_DELAY_BASE * Math.pow(2, retryCount);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return uploadSingleChunk(identifier, chunk, chunkNumber, totalChunks, totalSize, filename, chunkHash, retryCount + 1);
+    }
+    
     throw error;
   }
 }
 
-// 分片上传主函数
+// 分片上传主函数（优化版本）
 async function uploadFileWithChunks(file: File, uid: string) {
   const status = fileStatuses.value.find(s => s.uid === uid);
   if (!status) return;
@@ -186,50 +244,69 @@ async function uploadFileWithChunks(file: File, uid: string) {
     status.uploadedChunks = [];
 
     // 检查已上传的分片
+    const checkPromises = [];
     for (let i = 0; i < chunks; i++) {
-      const exists = await checkChunkExists(fileMd5, i);
+      checkPromises.push(
+        checkChunkExists(fileMd5, i).then(exists => ({ index: i, exists }))
+      );
+    }
+    
+    const checkResults = await Promise.all(checkPromises);
+    checkResults.forEach(({ index, exists }) => {
       if (exists) {
-        status.uploadedChunks.push(i);
+        status.uploadedChunks.push(index);
+      }
+    });
+
+    // 批量上传未完成的分片（并发控制）
+    const remainingChunks = [];
+    for (let i = 0; i < chunks; i++) {
+      if (!status.uploadedChunks.includes(i)) {
+        remainingChunks.push(i);
       }
     }
 
-    // 上传未完成的分片
-    for (let i = 0; i < chunks; i++) {
-      if (status.uploadedChunks.includes(i)) {
-        // 已上传的分片，更新进度
-        status.progress = Math.floor(((i + 1) / chunks) * 100);
-        continue;
-      }
+    // 分批处理剩余分片
+    const chunkBatches = [];
+    for (let i = 0; i < remainingChunks.length; i += UPLOAD_CONFIG.CHUNK_CONCURRENCY) {
+      chunkBatches.push(remainingChunks.slice(i, i + UPLOAD_CONFIG.CHUNK_CONCURRENCY));
+    }
 
-      // 切割分片
-      const start = i * CHUNK_SIZE;
-      const end = Math.min(start + CHUNK_SIZE, file.size);
-      const chunk = file.slice(start, end);
+    // 逐批上传分片
+    for (const batch of chunkBatches) {
+      const batchPromises = batch.map(async (chunkIndex) => {
+        // 切割分片
+        const start = chunkIndex * CHUNK_SIZE;
+        const end = Math.min(start + CHUNK_SIZE, file.size);
+        const chunk = file.slice(start, end);
 
-      // 计算分片MD5
-      const chunkBlob = new Blob([chunk]);
-      const chunkArrayBuffer = await chunkBlob.arrayBuffer();
-      const spark = new SparkMD5.ArrayBuffer();
-      spark.append(chunkArrayBuffer);
-      const chunkHash = spark.end();
+        // 计算分片MD5
+        const chunkBlob = new Blob([chunk]);
+        const chunkArrayBuffer = await chunkBlob.arrayBuffer();
+        const spark = new SparkMD5.ArrayBuffer();
+        spark.append(chunkArrayBuffer);
+        const chunkHash = spark.end();
 
-      // 上传分片
-      try {
-        await uploadSingleChunk(fileMd5, chunk, i, chunks, file.size, file.name, chunkHash);
-        status.uploadedChunks.push(i);
-        status.progress = Math.floor(((i + 1) / chunks) * 100);
-      } catch (error) {
-        status.status = 'error';
-        ElMessage.error(`分片 ${i + 1} 上传失败: ${error}`);
-        throw error;
-      }
+        // 上传分片
+        await uploadSingleChunk(fileMd5, chunk, chunkIndex, chunks, file.size, file.name, chunkHash);
+        
+        // 更新状态
+        status.uploadedChunks.push(chunkIndex);
+        const newProgress = Math.floor((status.uploadedChunks.length / chunks) * 95); // 留5%给合并
+        if (newProgress > status.progress) {
+          status.progress = newProgress;
+        }
+      });
+
+      // 等待批次完成
+      await Promise.all(batchPromises);
     }
 
     // 合并分片
     try {
       // 更新状态为合并中
       status.status = 'uploading';
-      status.progress = 99; // 设置接近完成但仍显示进行中
+      status.progress = 95;
       ElMessage.info(`${file.name} 分片上传完成，正在合并文件...`);
       
       await mergeChunksApi({
@@ -245,15 +322,17 @@ async function uploadFileWithChunks(file: File, uid: string) {
     } catch (error) {
       status.status = 'error';
       ElMessage.error(`${file.name} 合并失败: ${error}`);
+      throw error;
     }
   } catch (error) {
     status.status = 'error';
     console.error('文件上传失败:', error);
     ElMessage.error(`${file.name} 上传失败: ${error}`);
+    throw error;
   }
 }
 
-// 开始上传所有文件
+// 开始上传所有文件（优化版本）
 async function startUpload() {
   if (uploadFiles.length === 0) {
     ElMessage.error('上传文件不能为空');
@@ -273,17 +352,38 @@ async function startUpload() {
     identifier: ''
   }));
 
-  // 并行上传所有文件
-  const uploadPromises = uploadFiles.map((uploadFile, index) => {
-    return uploadFileWithChunks(uploadFile.raw, uploadFile.uid);
-  });
+  // 文件并发控制
+  const fileBatches = [];
+  const filesArray = [...uploadFiles];
+  
+  for (let i = 0; i < filesArray.length; i += UPLOAD_CONFIG.FILE_CONCURRENCY) {
+    fileBatches.push(filesArray.slice(i, i + UPLOAD_CONFIG.FILE_CONCURRENCY));
+  }
 
-  try {
-    await Promise.all(uploadPromises);
+  // 逐批上传文件
+  for (const batch of fileBatches) {
+    const batchPromises = batch.map((uploadFile) => {
+      return uploadFileWithChunks(uploadFile.raw, uploadFile.uid);
+    });
+
+    try {
+      await Promise.all(batchPromises);
+    } catch (error) {
+      console.error('批次上传失败:', error);
+      // 继续处理下一个批次，不中断整个上传过程
+    }
+  }
+
+  // 检查是否所有文件都上传成功
+  const failedFiles = fileStatuses.value.filter(status => status.status === 'error');
+  const successFiles = fileStatuses.value.filter(status => status.status === 'success');
+  
+  if (failedFiles.length > 0) {
+    ElMessage.warning(`上传完成：${successFiles.length}个成功，${failedFiles.length}个失败`);
+  } else {
+    ElMessage.success(`所有文件上传成功 (${successFiles.length}个)`);
     emit('success');
     closeDialog();
-  } catch (error) {
-    console.error('批量上传失败:', error);
   }
 }
 
@@ -305,11 +405,30 @@ function closeDialog() {
 function getStatusText(status: FileStatus) {
   switch (status.status) {
     case 'waiting': return '等待中';
-    case 'uploading': return `上传中 ${status.progress}%`;
+    case 'uploading': 
+      if (status.progress >= 95) {
+        return '合并中...';
+      }
+      return `上传中 ${status.progress}%`;
     case 'success': return '上传成功';
     case 'error': return '上传失败';
     default: return '未知';
   }
+}
+
+// 获取上传统计信息
+function getUploadStats() {
+  const totalFiles = fileStatuses.value.length;
+  const completedFiles = fileStatuses.value.filter(s => s.status === 'success').length;
+  const failedFiles = fileStatuses.value.filter(s => s.status === 'error').length;
+  const uploadingFiles = fileStatuses.value.filter(s => s.status === 'uploading').length;
+  
+  return {
+    total: totalFiles,
+    completed: completedFiles,
+    failed: failedFiles,
+    uploading: uploadingFiles
+  };
 }
 
 // 获取状态标签类型
@@ -356,7 +475,45 @@ defineExpose({ openDialog });
 
     <!-- 上传状态列表 -->
     <div v-if="fileStatuses.length > 0" class="mt-4">
-      <h4>上传状态</h4>
+      <div class="upload-stats mb-3">
+        <h4>上传统计</h4>
+        <el-row :gutter="20">
+          <el-col :span="6">
+            <el-card class="stat-card">
+              <div class="stat-item">
+                <span class="stat-label">总计:</span>
+                <span class="stat-value">{{ getUploadStats().total }}</span>
+              </div>
+            </el-card>
+          </el-col>
+          <el-col :span="6">
+            <el-card class="stat-card success">
+              <div class="stat-item">
+                <span class="stat-label">成功:</span>
+                <span class="stat-value">{{ getUploadStats().completed }}</span>
+              </div>
+            </el-card>
+          </el-col>
+          <el-col :span="6">
+            <el-card class="stat-card warning">
+              <div class="stat-item">
+                <span class="stat-label">上传中:</span>
+                <span class="stat-value">{{ getUploadStats().uploading }}</span>
+              </div>
+            </el-card>
+          </el-col>
+          <el-col :span="6">
+            <el-card class="stat-card danger">
+              <div class="stat-item">
+                <span class="stat-label">失败:</span>
+                <span class="stat-value">{{ getUploadStats().failed }}</span>
+              </div>
+            </el-card>
+          </el-col>
+        </el-row>
+      </div>
+      
+      <h4>文件详情</h4>
       <el-table :data="fileStatuses" style="width: 100%">
         <el-table-column prop="fileName" label="文件名" width="200">
           <template #default="{ row }">
@@ -376,7 +533,7 @@ defineExpose({ openDialog });
             <el-progress :percentage="row.progress" :status="row.status === 'error' ? 'exception' : undefined" />
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="status" label="状态" width="120">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row)">
               {{ getStatusText(row) }}
@@ -398,5 +555,62 @@ defineExpose({ openDialog });
 <style scoped>
 .mt-4 {
   margin-top: 1rem;
+}
+
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+.upload-stats {
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-card.success {
+  border-color: var(--el-color-success);
+}
+
+.stat-card.warning {
+  border-color: var(--el-color-warning);
+}
+
+.stat-card.danger {
+  border-color: var(--el-color-danger);
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+.stat-card.success .stat-value {
+  color: var(--el-color-success);
+}
+
+.stat-card.warning .stat-value {
+  color: var(--el-color-warning);
+}
+
+.stat-card.danger .stat-value {
+  color: var(--el-color-danger);
 }
 </style>
