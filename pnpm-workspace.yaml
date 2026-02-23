@@ -86,7 +86,7 @@ catalog:
   dotenv: ^16.4.7
   echarts: ^5.6.0
   element-plus: ^2.9.4
-  eslint: ^9.20.1
+  eslint: ^10.0.1
   eslint-config-turbo: ^2.4.2
   eslint-plugin-command: ^0.2.7
   eslint-plugin-eslint-comments: ^3.2.0
