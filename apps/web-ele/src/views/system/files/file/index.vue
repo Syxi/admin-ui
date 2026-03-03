@@ -183,6 +183,9 @@ const previewableExts = [
   'ppt', 'pptx', 'pptm',
   'odp', 'otp',
 
+  // 图片
+  'jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp',
+
   // 已是 PDF
   'pdf'
 ].map(ext => ext.toLowerCase());
