@@ -13,6 +13,7 @@ export default defineConfig(async () => {
       plugins: [
         ElementPlus({
           format: 'esm',
+          useSource: true,
         }),
       ],
       server: {
