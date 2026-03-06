@@ -9,7 +9,6 @@ import { ElForm, ElMessage, ElMessageBox } from 'element-plus';
 
 import { deleteMenuApi, selectMenuTreeApi } from '#/api/system/sys/menu';
 import { MenuTypeEnum } from '#/enums/MenuTypesEnum';
-import { useCardHeight } from '#/hooks/useCardHeight';
 import MenuFormDrawer from '#/views/system/sys/menu/MenuFormDrawer.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
 

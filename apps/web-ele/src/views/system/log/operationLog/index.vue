@@ -4,7 +4,7 @@ import type { OperationLog, OperationLogQuery } from '#/api/system/log/log';
 import { onMounted, reactive, ref } from 'vue';
 
 import { selectOperationLogPageApi } from '#/api/system/log/log';
-import {useCardHeight} from "#/hooks/useCardHeight";
+
 import {useTableHeight} from "#/hooks/useTableHeight";
 
 const queryFormRef = ref();

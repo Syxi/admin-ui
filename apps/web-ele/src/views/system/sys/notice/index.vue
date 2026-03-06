@@ -16,7 +16,6 @@ import {
   selectNoticePageApi,
   topNoticeApi,
 } from '#/api/system/sys/notice';
-import {useCardHeight} from "#/hooks/useCardHeight";
 import NoticeFormDrawer from "#/views/system/sys/notice/NoticeFormDrawer.vue";
 import {useTableHeight} from "#/hooks/useTableHeight";
 

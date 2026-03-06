@@ -8,7 +8,7 @@ import { Icon } from '@iconify/vue';
 import { ElForm, ElMessage, ElMessageBox } from 'element-plus';
 
 import { deletePlatformApi, selectPageApi } from '#/api/system/sys/platform';
-import { useCardHeight } from '#/hooks/useCardHeight';
+import { useTableHeight } from '#/hooks/useTableHeight';
 import PlatformFormDialog from '#/views/system/sys/platform/platformFormDialog.vue';
 
 const queryFormRef = ref(ElForm);
@@ -68,8 +68,7 @@ const handleDelete = (id: string) => {
   });
 };
 
-const cardFormRef = ref();
-const { cardHeight, tableHeight } = useCardHeight(cardFormRef);
+const { tableHeight } = useTableHeight(queryFormRef);
 
 onMounted(() => {
   handleQuery();
@@ -123,7 +122,7 @@ onMounted(() => {
       </ElForm>
     </el-card>
 
-    <el-card :style="{ height: cardHeight }" shadow="never">
+    <el-card shadow="never">
       <el-table
         ref="dataTableRef"
         v-loading="loading"

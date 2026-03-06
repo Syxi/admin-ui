@@ -15,7 +15,7 @@ import {
   scheduledJobPageApi,
   selectJobBeanNameListApi,
 } from '#/api/system/log/scheduledJob';
-import { useCardHeight } from '#/hooks/useCardHeight';
+
 import ScheduledJobFormDialog from '#/views/system/quartz/scheduledJob/ScheduledJobFormDialog.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
 

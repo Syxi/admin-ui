@@ -9,7 +9,7 @@ import {
   deleteDictTypeApi,
   selectDictTypePageApi,
 } from '#/api/system/sys/dictType';
-import { useCardHeight } from '#/hooks/useCardHeight';
+
 import DictFormDialog from '#/views/system/sys/dict/DictFormDialog.vue';
 import DictValue from '#/views/system/sys/dict/DictValue.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";

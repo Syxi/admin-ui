@@ -253,7 +253,7 @@ import {
   deleteTenantPackageApi,
   selectTenantPackagePageApi,
 } from '#/api/system/sys/tenantPackage';
-import { useCardHeight } from '#/hooks/useCardHeight';
+
 import { useTableHeight } from '#/hooks/useTableHeight';
 import { formatDateTime } from '@vben/utils';
 import TenantPackageFormDialog from '#/views/system/sys/tenantPackage/TenantPackageFormDialog.vue';

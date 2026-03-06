@@ -4,7 +4,7 @@ import type { LoginLog, LoginLogQuery } from '#/api/system/log/log';
 import { onMounted, reactive, ref } from 'vue';
 
 import { selectLoginLogPageApi } from '#/api/system/log/log';
-import { useCardHeight } from '#/hooks/useCardHeight';
+
 import {useTableHeight} from "#/hooks/useTableHeight";
 
 const queryFormRef = ref();

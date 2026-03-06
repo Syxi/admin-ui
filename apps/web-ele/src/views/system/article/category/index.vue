@@ -12,7 +12,7 @@ import {
   deleteCategoryApi,
   selectCategoryPageApi,
 } from '#/api/system/article/category';
-import {useCardHeight} from "#/hooks/useCardHeight";
+
 import CategoryFormDialog from "#/views/system/article/category/CategoryFormDialog.vue";
 import {useTableHeight} from "#/hooks/useTableHeight";
 

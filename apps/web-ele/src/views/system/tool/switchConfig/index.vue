@@ -15,7 +15,7 @@ import {
   updateStatusApi,
   updateSwitchConfigApi,
 } from '#/api/system/tool/switchConfig';
-import { useCardHeight } from '#/hooks/useCardHeight';
+
 import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({

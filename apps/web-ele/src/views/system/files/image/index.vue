@@ -10,7 +10,7 @@ import {
   handleDownloadImageApi,
   selectImagePageApi,
 } from '#/api/system/files/image';
-import { useCardHeight } from '#/hooks/useCardHeight';
+
 import ImageFormDialog from '#/views/system/files/image/ImageFormDialog.vue';
 import ImageUploadDialog from '#/views/system/files/image/ImageUploadDialog.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";

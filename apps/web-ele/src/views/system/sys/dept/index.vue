@@ -11,7 +11,7 @@ import {
   deptOptionTreeApi,
   orgTreeApi,
 } from '#/api/system/sys/dept';
-import { useCardHeight } from '#/hooks/useCardHeight';
+
 import DeptFormDialog from '#/views/system/sys/dept/DeptFormDialog.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
 

@@ -15,7 +15,7 @@ import {
   deleteTenantApi,
   selectTenantPageApi,
 } from '#/api/system/sys/tenant';
-import { useCardHeight } from '#/hooks/useCardHeight';
+
 import TenantFormDialog from '#/views/system/sys/tenant/TenantFormDialog.vue';
 import TenantUserDialog from '#/views/system/sys/tenant/TenantUserDialog.vue';
 import TenantPackageAssignDialog from '#/views/system/sys/tenantPackage/TenantPackageAssignDialog.vue';

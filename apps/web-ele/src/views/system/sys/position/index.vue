@@ -10,7 +10,7 @@ import {
   deletePositionApi,
   selectPositionPageApi,
 } from '#/api/system/sys/position';
-import { useCardHeight } from '#/hooks/useCardHeight';
+
 import PositionFormDialog from '#/views/system/sys/position/PositionFormDialog.vue';
 import {useTableHeight} from "#/hooks/useTableHeight";
 

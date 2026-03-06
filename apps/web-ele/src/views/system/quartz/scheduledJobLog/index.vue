@@ -10,7 +10,7 @@ import { ElForm } from 'element-plus';
 
 import { selectJobBeanNameListApi } from '#/api/system/log/scheduledJob';
 import { selectScheduledJobLogPageApi } from '#/api/system/log/scheduledJobLog';
-import { useCardHeight } from '#/hooks/useCardHeight';
+
 import {useTableHeight} from "#/hooks/useTableHeight";
 
 defineOptions({
